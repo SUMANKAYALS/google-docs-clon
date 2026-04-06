@@ -191,7 +191,7 @@ Contributions, issues and feature requests are welcome!
 **Suman Kayal** · *Sky*
 
 - GitHub: [@SUMANKAYALS](https://github.com/SUMANKAYALS)
-- LinkedIn: [Suman Kayal](#)
+- LinkedIn: [Suman Kayal](https://www.linkedin.com/in/suman-kayal10/)
 
 ---
 
