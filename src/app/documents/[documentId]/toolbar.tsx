@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { useEditorStore } from "@/store/use-editor-store";
 import { Separator } from "@/components/ui/separator"
-import { BoldIcon, ItalicIcon, LucideIcon, PrinterIcon, Redo2Icon, SpellCheck, SpellCheckIcon, UnderlineIcon, Undo2Icon } from "lucide-react";
+import { BoldIcon, ItalicIcon, ListTodoIcon, LucideIcon, MessageSquarePlusIcon, PrinterIcon, Redo2Icon, RemoveFormattingIcon, SpellCheck, SpellCheckIcon, UnderlineIcon, Undo2Icon } from "lucide-react";
 
 interface ToolbarButtonProps {
     onClick?: () => void;
@@ -88,6 +88,26 @@ export const Toolbar = () => {
                     onClick: () => editor?.chain().focus().toggleUnderline().run(),
                 },
             ],
+            [
+                {
+                    label: "Comment",
+                    icon: MessageSquarePlusIcon,
+                    onClick: () => console.log("todo: Comment"),
+                    isActive: false, // todo: Enable this functionality
+                },
+                {
+                    label: "List Todo",
+                    icon: ListTodoIcon,
+                    onClick: () => editor?.chain().focus().toggleTaskList().run(),
+                    isActive: editor?.isActive("taskList"),
+                },
+                {
+                    label: "Remove Formatting",
+                    icon: RemoveFormattingIcon,
+                    onClick: () => editor?.chain().focus().unsetAllMarks().run(),
+                    // isActive: editor?.isActive("taskList"),
+                },
+            ],
         ];
 
 
@@ -108,6 +128,20 @@ export const Toolbar = () => {
 
             {
                 section[1].map((item) => (
+                    <ToolbarButton key={item.label} {...item} />
+                ))
+            }
+            {/* todo: text color */}
+            {/* todo: highlight color */}
+            <Separator orientation="vertical" className="h-6 bg-neutral-300" />
+            {/* todo: link */}
+            {/* todo: image */}
+            {/* todo: align */}
+            {/* todo: line height */}
+            {/* todo: list */}
+
+            {
+                section[2].map((item) => (
                     <ToolbarButton key={item.label} {...item} />
                 ))
             }
