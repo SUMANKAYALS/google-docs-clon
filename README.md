@@ -11,7 +11,7 @@
 [![Vercel](https://img.shields.io/badge/Deployed_on-Vercel-000?style=for-the-badge&logo=vercel)](https://vercel.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
-[🚀 Live Demo](#) · [📂 GitHub](https://github.com/SUMANKAYALS) · [💼 LinkedIn](#)
+[🚀 Live Demo](#) · [📂 GitHub](https://github.com/SUMANKAYALS) · [💼 LinkedIn](https://www.linkedin.com/in/suman-kayal10/)
 
 </div>
 
