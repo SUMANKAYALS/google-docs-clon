@@ -2,6 +2,8 @@
 
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
+import TextStyle from "@tiptap/extension-text-style";
+import FontFamily from "@tiptap/extension-font-family";
 import Image from '@tiptap/extension-image';
 import ImageResize from "tiptap-extension-resize-image";
 import Table from "@tiptap/extension-table";
@@ -49,6 +51,8 @@ export const Editor = () => {
         },
         extensions: [
             StarterKit,
+            FontFamily,
+            TextStyle,
             Underline,
             Image,
             ImageResize,
