@@ -3,7 +3,9 @@
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
 import TextStyle from "@tiptap/extension-text-style";
+import TextAlign from '@tiptap/extension-text-align'
 import FontFamily from "@tiptap/extension-font-family";
+import Link from '@tiptap/extension-link'
 import { Color } from "@tiptap/extension-color";
 import Highlight from "@tiptap/extension-highlight"
 import Image from '@tiptap/extension-image';
@@ -53,6 +55,14 @@ export const Editor = () => {
         },
         extensions: [
             StarterKit,
+            TextAlign.configure({
+                types: ["heading", "paragraph"]
+            }),
+            Link.configure({
+                openOnClick: false,
+                autolink: true,
+                defaultProtocol: "https",
+            }),
             Color,
             Highlight.configure({
                 multicolor: true,
