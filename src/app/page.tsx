@@ -1,11 +1,5 @@
-import Link from "next/link";
+import { redirect } from "next/navigation";
 
-const Home = () => {
-  return (
-    <div className="flex min-h-screen items-center justify-center">
-      Click <Link href="/documents/123"> &nbsp;<span className=" text-blue-500 underline"> here </span>&nbsp;</Link> to go to documents id
-    </div>
-  );
+export default function Home() {
+  redirect("/documents");
 }
-
-export default Home;

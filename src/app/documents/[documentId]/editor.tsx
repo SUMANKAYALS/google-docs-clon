@@ -1,117 +1,235 @@
 "use client";
 
+import React, { useCallback, useState } from "react";
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
+import Collaboration from "@tiptap/extension-collaboration";
+import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
 import TextStyle from "@tiptap/extension-text-style";
-import TextAlign from '@tiptap/extension-text-align'
+import TextAlign from "@tiptap/extension-text-align";
 import FontFamily from "@tiptap/extension-font-family";
-import Link from '@tiptap/extension-link'
+import Link from "@tiptap/extension-link";
 import { Color } from "@tiptap/extension-color";
-import Highlight from "@tiptap/extension-highlight"
-import Image from '@tiptap/extension-image';
+import Highlight from "@tiptap/extension-highlight";
 import ImageResize from "tiptap-extension-resize-image";
 import Table from "@tiptap/extension-table";
 import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
 import TableRow from "@tiptap/extension-table-row";
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import Underline from '@tiptap/extension-underline'
+import {
+    useEditor,
+    EditorContent,
+    type Editor as TipTapEditor,
+    type Extension,
+} from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
 
 import { useEditorStore } from "@/store/use-editor-store";
 import { FontSizeExtension } from "@/extensions/font-size";
 import { LineHeightExtension } from "@/extensions/line-height";
+import { LiveMousePointers } from "@/components/live-mouse-pointers";
+import { SelectionMenu } from "@/components/ai/selection-menu";
 
-export const Editor = () => {
-    const { setEditor } = useEditorStore();
+interface EditorProps {
+    initialContent?: string;
+    onContentChange?: (content: string) => void;
+    onReady?: () => void;
+    yDoc?: Y.Doc | null;
+    provider?: WebsocketProvider | null;
+    currentUser?: {
+        id: string;
+        name: string;
+        color: string;
+        image?: string;
+    } | null;
+    isEditable?: boolean;
+    onAIAction?: (action: "rewrite" | "improve" | "summarize" | "translate" | "expand" | "shorten" | "explain" | "continue", selection: string) => void;
+}
+
+export const Editor = React.memo(({
+    initialContent = "",
+    onContentChange,
+    onReady,
+    yDoc,
+    provider,
+    currentUser,
+    isEditable = true,
+    onAIAction,
+}: EditorProps) => {
+    const setEditor = useEditorStore((state) => state.setEditor);
+    const [selectionText, setSelectionText] = useState("");
+
+    const parsedContent = React.useMemo(() => {
+        if (!initialContent || initialContent.trim() === "") return "";
+        try {
+            return JSON.parse(initialContent);
+        } catch {
+            return initialContent; // Fallback to HTML/text
+        }
+    }, [initialContent]);
+
+    React.useEffect(() => {
+        console.log("[Editor] Initial content received (length):", initialContent?.length || 0);
+        console.log("[Editor] Parsed content:", parsedContent);
+    }, [initialContent, parsedContent]);
+
+    const handleEditorUpdate = useCallback(
+        ({ editor }: { editor: TipTapEditor }) => {
+            setEditor(editor);
+            if (onContentChange) {
+                const jsonString = JSON.stringify(editor.getJSON());
+                onContentChange(jsonString);
+            }
+        },
+        [setEditor, onContentChange]
+    );
+
+    const handleSelectionUpdate = useCallback(
+        ({ editor }: { editor: TipTapEditor }) => {
+            setEditor(editor);
+            const { from, to } = editor.state.selection;
+            setSelectionText(from !== to ? editor.state.doc.textBetween(from, to).trim() : "");
+        },
+        [setEditor]
+    );
+
+    const extensions = [
+        StarterKit.configure({
+            history: yDoc ? false : {},
+        }),
+        yDoc
+            ? Collaboration.configure({
+                document: yDoc,
+                field: "default",
+            })
+            : null,
+        provider && currentUser
+            ? CollaborationCursor.configure({
+                provider: provider,
+                user: {
+                    name: currentUser.name,
+                    color: currentUser.color,
+                },
+            })
+            : null,
+        LineHeightExtension.configure({
+            types: ["heading", "paragraph"],
+            defaultLineHeight: "normal",
+        }),
+        FontSizeExtension,
+        TextAlign.configure({
+            types: ["heading", "paragraph"],
+        }),
+        Link.configure({
+            openOnClick: false,
+            autolink: true,
+            defaultProtocol: "https",
+        }),
+        Color,
+        Highlight.configure({
+            multicolor: true,
+        }),
+        FontFamily,
+        TextStyle,
+        Underline,
+        ImageResize,
+        Table.configure({
+            resizable: true,
+        }),
+        TableCell,
+        TableHeader,
+        TableRow,
+        TaskItem.configure({
+            nested: true,
+        }),
+        TaskList,
+    ].filter(Boolean) as Extension[];
+
     const editor = useEditor({
+        editable: isEditable,
         onCreate({ editor }) {
             setEditor(editor);
         },
         onDestroy() {
             setEditor(null);
         },
-        onUpdate({ editor }) {
-            setEditor(editor);
-        },
-        onSelectionUpdate({ editor }) {
-            setEditor(editor);
-        },
-        onTransaction({ editor }) {
-            setEditor(editor);
-        },
-        onFocus({ editor }) {
-            setEditor(editor);
-        },
-        onBlur({ editor }) {
-            setEditor(editor);
-        },
-        onContentError({ editor }) {
-            setEditor(editor);
-        },
+        onUpdate: handleEditorUpdate,
+        onSelectionUpdate: handleSelectionUpdate,
+        onTransaction: ({ editor }) => setEditor(editor),
+        onFocus: ({ editor }) => setEditor(editor),
+        onBlur: ({ editor }) => setEditor(editor),
         editorProps: {
             attributes: {
                 style: "padding-left: 56px; padding-right: 56px;",
-                class: "focus:outline-none print:border-0 bg-white border border-[#C7C7C7] flex flex-col min-h-[1054px] w-[816px] pt-10 pr-14 pb-10 cursor-text",
+                class: "focus:outline-none print:border-0 bg-white border border-[#C7C7C7] flex flex-col min-h-[1054px] w-[816px] pt-10 pr-14 pb-10 cursor-text shadow-sm",
             },
         },
-        extensions: [
-            StarterKit,
-            LineHeightExtension.configure({
-                types: ["heading", "paragraph"],
-                defaultLineHeight: "normal",
-            }),
-            FontSizeExtension,
-            TextAlign.configure({
-                types: ["heading", "paragraph"]
-            }),
-            Link.configure({
-                openOnClick: false,
-                autolink: true,
-                defaultProtocol: "https",
-            }),
-            Color,
-            Highlight.configure({
-                multicolor: true,
-            }),
-            FontFamily,
-            TextStyle,
-            Underline,
-            Image,
-            ImageResize,
-            Table,
-            TableCell,
-            TableHeader,
-            TableRow,
-            TaskItem.configure({
-                nested: true,
-            }),
-            TaskList,
-        ],
-        content: `
-        <table>
-          <tbody>
-            <tr>
-              <th>Name</th>
-              <th colspan="3">Description</th>
-            </tr>
-            <tr>
-              <td>Cyndi Lauper</td>
-              <td>Singer</td>
-              <td>Songwriter</td>
-              <td>Actress</td>
-            </tr>
-          </tbody>
-        </table>
-      `,
-        // Don't render immediately on the server to avoid SSR issues
+        extensions,
+        content: parsedContent || "<p></p>",
         immediatelyRender: false,
-    })
+    }, [yDoc, provider]);
+
+    const hasInitializedRef = React.useRef(false);
+
+    React.useEffect(() => {
+        if (provider && yDoc && editor) {
+            const handleSync = () => {
+                if (hasInitializedRef.current) {
+                    if (onReady) onReady();
+                    return;
+                }
+                const fragment = yDoc.getXmlFragment("default");
+                console.log(`[Editor Sync] Sync complete. Fragment length: ${fragment.length}`);
+                if (fragment.length === 0 && parsedContent) {
+                    console.log(`[Editor Sync] Yjs is empty, initializing with parsedContent.`);
+                    editor.commands.setContent(parsedContent);
+                }
+                hasInitializedRef.current = true;
+                if (onReady) {
+                    onReady();
+                }
+            };
+
+            if (provider.synced) {
+                handleSync();
+            } else {
+                provider.on("sync", handleSync);
+            }
+
+            return () => {
+                provider.off("sync", handleSync);
+            };
+        } else if (!provider && editor) {
+            if (!hasInitializedRef.current) {
+                hasInitializedRef.current = true;
+                if (onReady) {
+                    onReady();
+                }
+            }
+        }
+    }, [provider, yDoc, editor, parsedContent, onReady]);
+
+    const containerRef = React.useRef<HTMLDivElement | null>(null);
+
     return (
-        <div className=' size-full overflow-x-auto bg-[#F9FBFD] px-4 print:p-0 print:bg-white print:overflow-visible'>
-            <div className='min-w-max flex justify-center w-[816px] py-4 print:py-0 mx-auto print:w-full print:min-w-0'>
+        <div className="size-full overflow-x-auto bg-[#F9FBFD] px-4 print:p-0 print:bg-white print:overflow-visible flex flex-col items-center">
+            <div
+                ref={containerRef}
+                className="relative min-w-max flex justify-center w-[816px] py-4 print:py-0 mx-auto print:w-full print:min-w-0"
+            >
+                <LiveMousePointers
+                    containerRef={containerRef}
+                    provider={provider || null}
+                    currentUser={currentUser}
+                />
+                <SelectionMenu selection={selectionText} onAction={(action) => onAIAction?.(action, selectionText)} />
                 <EditorContent editor={editor} />
             </div>
         </div>
-    )
-}
+    );
+});
+
+Editor.displayName = "Editor";

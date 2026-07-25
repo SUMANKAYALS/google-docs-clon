@@ -4,19 +4,18 @@ import "@tiptap/extension-text-style";
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         fontSize: {
-            setFontSize: (size: string) => ReturnType
-            unsetFontSize: () => ReturnType
-        }
+            setFontSize: (size: string) => ReturnType;
+            unsetFontSize: () => ReturnType;
+        };
     }
 }
-
 
 export const FontSizeExtension = Extension.create({
     name: "fontSize",
     addOptions() {
         return {
             types: ["textStyle"],
-        }
+        };
     },
     addGlobalAttributes() {
         return [
@@ -25,19 +24,19 @@ export const FontSizeExtension = Extension.create({
                 attributes: {
                     fontSize: {
                         default: null,
-                        parseHTML: element => element.style.fontSize,
-                        renderHTML: attributes => {
+                        parseHTML: (element) => element.style.fontSize,
+                        renderHTML: (attributes) => {
                             if (!attributes.fontSize) {
                                 return {};
                             }
                             return {
                                 style: `font-size: ${attributes.fontSize}`,
-                            }
-                        }
-                    }
-                }
-            }
-        ]
+                            };
+                        },
+                    },
+                },
+            },
+        ];
     },
 
     addCommands() {
@@ -45,14 +44,14 @@ export const FontSizeExtension = Extension.create({
             setFontSize: (fontSize: string) => ({ chain }) => {
                 return chain()
                     .setMark("textStyle", { fontSize })
-                    .run()
+                    .run();
             },
             unsetFontSize: () => ({ chain }) => {
                 return chain()
-                    .setMark("textStyle", { fontStyle: null })
+                    .setMark("textStyle", { fontSize: null })
                     .removeEmptyTextStyle()
-                    .run()
+                    .run();
             },
-        }
+        };
     },
 });
