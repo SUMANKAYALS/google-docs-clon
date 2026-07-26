@@ -6,7 +6,10 @@ import { User } from "@/models/User";
 import { DocumentModel } from "@/models/Document";
 import { updateProfileSchema } from "@/lib/validations/auth";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
+
   try {
     const session = await auth();
     if (!session || !session.user?.id) {

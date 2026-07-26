@@ -6,15 +6,15 @@ import { JoinClient } from "./join-client";
 
 export const dynamic = "force-dynamic";
 
-interface JoinPageProps {
-  params: Promise<{
-    inviteCode: string;
-  }>;
-}
+type Props = {
+  params: Promise<{ inviteCode: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
-export default async function JoinPage({ params }: JoinPageProps) {
+export default async function JoinPage(props: Props) {
+  const params = await props.params;
+  const inviteCode = params.inviteCode;
   const session = await auth();
-  const { inviteCode } = await params;
 
   if (!session || !session.user?.id) {
     redirect(`/login?callbackUrl=/join/${inviteCode}`);

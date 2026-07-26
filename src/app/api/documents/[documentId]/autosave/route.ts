@@ -16,7 +16,10 @@ function createErrorResponse(message: string, status: number, details?: Record<s
     );
 }
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest, { params }: { params: Promise<{ documentId?: string }> }) {
+
     const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const { documentId } = await params;
 

@@ -327,9 +327,25 @@ export function DocumentClient({ document: initialDocument }: DocumentClientProp
     yDocRef.current = doc;
     setYDoc(doc);
 
-    const wsUrl = process.env.NEXT_PUBLIC_COLLAB_WS_URL || "ws://localhost:1234";
+    const resolveWsUrl = (): string => {
+      if (process.env.NEXT_PUBLIC_WS_URL) {
+        return process.env.NEXT_PUBLIC_WS_URL;
+      }
+      if (process.env.NEXT_PUBLIC_COLLAB_WS_URL) {
+        return process.env.NEXT_PUBLIC_COLLAB_WS_URL;
+      }
+      if (typeof window !== "undefined") {
+        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        const host = window.location.hostname || "127.0.0.1";
+        return `${protocol}//${host}:1234`;
+      }
+      return "ws://127.0.0.1:1234";
+    };
+
+    const wsUrl = resolveWsUrl();
     let wsProvider: WebsocketProvider | null = null;
     let isDestroyed = false;
+
 
     try {
       wsProvider = new WebsocketProvider(wsUrl, initialDocument.id, doc, {

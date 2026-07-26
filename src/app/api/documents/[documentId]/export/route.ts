@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import htmlToDocx from "html-to-docx";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest, { params }: { params: Promise<{ documentId: string }> }) {
+
     try {
         const { documentId } = await params;
         const { title, content } = await request.json();

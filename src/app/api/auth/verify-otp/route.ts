@@ -5,7 +5,10 @@ import { connectToDatabase } from "@/lib/db";
 import { User } from "@/models/User";
 import { OTP } from "@/models/OTP";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
+
   try {
     const { email, otp } = await req.json();
 

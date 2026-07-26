@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AlertTriangleIcon, RefreshCwIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function GlobalError({
+export default function ErrorBoundary({
   error,
   reset,
 }: {
@@ -13,7 +13,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Global Application Error:", error);
+    console.error("Application Error:", error);
   }, [error]);
 
   return (
@@ -23,7 +23,7 @@ export default function GlobalError({
       </div>
       <h1 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong!</h1>
       <p className="text-sm text-gray-600 max-w-md mb-6">
-        An unexpected error occurred while loading this page. Our team has been notified.
+        An unexpected error occurred while loading this page.
       </p>
       <div className="flex items-center gap-x-3">
         <Button onClick={reset} variant="default" className="flex items-center gap-x-2">

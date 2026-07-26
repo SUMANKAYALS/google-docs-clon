@@ -1,0 +1,40 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: clouds-docs-app
+
+    ports:
+      - "3000:3000"
+
+    env_file:
+      - .env.local
+
+    environment:
+      - NEXT_PUBLIC_WS_URL=${NEXT_PUBLIC_WS_URL:-ws://localhost:1234}
+
+    depends_on:
+      - collab
+
+    restart: unless-stopped
+
+  collab:
+    build:
+      context: .
+      dockerfile: Dockerfile.collab
+
+    container_name: clouds-docs-collab
+
+    ports:
+      - "1234:1234"
+
+    env_file:
+      - .env.local
+
+    environment:
+      - PORT=1234
+      - HOST=0.0.0.0
+
+    restart: unless-stopped

@@ -6,7 +6,10 @@ import { OTP } from "@/models/OTP";
 import { registerSchema } from "@/lib/validations/auth";
 import { sendOTPEmail } from "@/lib/mail";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
+
   try {
     const body = await req.json();
 

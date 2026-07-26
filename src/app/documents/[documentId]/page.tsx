@@ -5,12 +5,14 @@ import { DocumentClient } from "./document-client";
 
 export const dynamic = "force-dynamic";
 
-interface DocumentIdPageProps {
+type Props = {
   params: Promise<{ documentId: string }>;
-}
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
-export async function generateMetadata({ params }: DocumentIdPageProps) {
-  const { documentId } = await params;
+export async function generateMetadata(props: Props) {
+  const params = await props.params;
+  const documentId = params.documentId;
 
   if (!isValidObjectId(documentId)) {
     return {
@@ -32,8 +34,9 @@ export async function generateMetadata({ params }: DocumentIdPageProps) {
   };
 }
 
-export default async function DocumentIdPage({ params }: DocumentIdPageProps) {
-  const { documentId } = await params;
+export default async function DocumentIdPage(props: Props) {
+  const params = await props.params;
+  const documentId = params.documentId;
 
   if (!isValidObjectId(documentId)) {
     notFound();

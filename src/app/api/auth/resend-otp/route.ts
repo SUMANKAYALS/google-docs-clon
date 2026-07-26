@@ -5,7 +5,10 @@ import { User } from "@/models/User";
 import { OTP } from "@/models/OTP";
 import { sendOTPEmail } from "@/lib/mail";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
+
   try {
     const { email } = await req.json();
 
