@@ -42,8 +42,8 @@ export default function ForgotPasswordPage() {
       }
 
       setSuccess("A password reset code has been sent to your email.");
-    } catch (err: any) {
-      setError(err?.message || "An unexpected error occurred. Please try again.");
+    } catch (err: unknown) {
+      setError((err as Error).message || "An unexpected error occurred. Please try again.");
       setLoading(false);
     }
   };

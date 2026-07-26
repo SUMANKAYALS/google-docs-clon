@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     // Handle "node:" URI scheme imports (e.g. node:diagnostics_channel, node:dns, node:events)
     if (webpack && webpack.NormalModuleReplacementPlugin) {
       config.plugins.push(
-        new webpack.NormalModuleReplacementPlugin(/^node:/, (resource: any) => {
+        new webpack.NormalModuleReplacementPlugin(/^node:/, (resource: { request: string }) => {
           resource.request = resource.request.replace(/^node:/, "");
         })
       );
