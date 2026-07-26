@@ -19,11 +19,11 @@ export async function POST(req: Request) {
       );
     }
 
-    const lowerEmail = email.toLowerCase();
+    const lowerEmail = email.trim().toLowerCase();
     await connectToDatabase();
 
     // 1. Check if user exists
-    const user = await User.findOne({ email: lowerEmail });
+    const user = await User.findOne({ email: lowerEmail }).select("+isVerified");
     if (!user) {
       return NextResponse.json(
         { error: "Account not found" },
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 3. Enforce attempt limits (rate limit attempts / lock accounts)
+    // 3. Enforce attempt limits
     if (otpRecord.attempts >= 5) {
       return NextResponse.json(
         { error: "Maximum verification attempts exceeded. Please request a new code." },
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     }
 
     // 5. Compare hashed OTP
-    const isMatch = await bcrypt.compare(otp, otpRecord.otp);
+    const isMatch = await bcrypt.compare(otp.trim(), otpRecord.otp);
     if (!isMatch) {
       otpRecord.attempts += 1;
       await otpRecord.save();
@@ -74,12 +74,28 @@ export async function POST(req: Request) {
       );
     }
 
-    // 6. Success: Mark user as verified & generate temporary bypass token
-    user.isVerified = true;
+    // 6. Success: Atomically mark user as verified in MongoDB
     const bypassToken = crypto.randomBytes(32).toString("hex");
-    user.otpBypassToken = bypassToken;
-    user.otpBypassTokenExpires = new Date(Date.now() + 60 * 1000); // 1 minute expiry
-    await user.save();
+    const updatedUser = await User.findOneAndUpdate(
+      { email: lowerEmail },
+      {
+        $set: {
+          isVerified: true,
+          otpBypassToken: bypassToken,
+          otpBypassTokenExpires: new Date(Date.now() + 60 * 1000),
+        },
+      },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return NextResponse.json(
+        { error: "Failed to update user verification status." },
+        { status: 500 }
+      );
+    }
+
+    console.log("[Verify OTP Success] Permanent isVerified=true set in MongoDB for:", lowerEmail);
 
     // Clean up OTP document
     await OTP.deleteOne({ _id: otpRecord._id });
@@ -87,7 +103,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       message: "Email verified successfully!",
-      email: user.email,
+      email: updatedUser.email,
       bypassToken,
     });
   } catch (error) {

@@ -23,11 +23,11 @@ export async function registerUserAction(data: RegisterInput) {
     }
 
     const { name, email, password } = validation.data;
-    const lowerEmail = email.toLowerCase().trim();
+    const lowerEmail = email.trim().toLowerCase();
 
     await connectToDatabase();
 
-    const existingUser = await User.findOne({ email: lowerEmail });
+    const existingUser = await User.findOne({ email: lowerEmail }).select("+isVerified");
     if (existingUser) {
       if (existingUser.isVerified) {
         return { error: "An account with this email address already exists" };
@@ -35,6 +35,7 @@ export async function registerUserAction(data: RegisterInput) {
         const hashedPassword = await bcrypt.hash(password, 12);
         existingUser.name = name;
         existingUser.password = hashedPassword;
+        existingUser.isVerified = false;
         await existingUser.save();
       }
     } else {
@@ -94,7 +95,7 @@ export async function getUserProfileAction() {
 
     await connectToDatabase();
 
-    const user = await User.findById(session.user.id).lean();
+    const user = await User.findById(session.user.id).select("+isVerified").lean();
     if (!user) {
       return { error: "User not found" };
     }
@@ -187,7 +188,7 @@ export async function updateProfileAction(data: UpdateProfileInput) {
         } 
       },
       { new: true, runValidators: true }
-    ).lean();
+    ).select("+isVerified").lean();
 
     if (!updatedUser) {
       return { error: "User not found" };

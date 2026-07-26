@@ -19,11 +19,11 @@ export async function POST(req: Request) {
       );
     }
 
-    const lowerEmail = email.toLowerCase();
+    const lowerEmail = email.trim().toLowerCase();
     await connectToDatabase();
 
     // 1. Check if user exists
-    const user = await User.findOne({ email: lowerEmail });
+    const user = await User.findOne({ email: lowerEmail }).select("+isVerified");
     if (!user) {
       return NextResponse.json(
         { error: "Account not found" },

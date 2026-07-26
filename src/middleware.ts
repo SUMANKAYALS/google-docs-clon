@@ -1,27 +1,32 @@
+import NextAuth from "next-auth";
+import { authConfig } from "@/auth.config";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 
-export function middleware(request: NextRequest) {
-  const sessionToken =
-    request.cookies.get("next-auth.session-token")?.value ||
-    request.cookies.get("__Secure-next-auth.session-token")?.value ||
-    request.cookies.get("authjs.session-token")?.value ||
-    request.cookies.get("__Secure-authjs.session-token")?.value;
+const { auth } = NextAuth(authConfig);
 
-  const { pathname } = request.nextUrl;
+export default auth((req) => {
+  const { pathname } = req.nextUrl;
+  const isLoggedIn = !!req.auth;
+
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register");
   const isProtectedRoute = pathname.startsWith("/documents") || pathname.startsWith("/profile");
 
+  console.log(`[Auth Middleware] Path: ${pathname} | IsLoggedIn: ${isLoggedIn} | User: ${req.auth?.user?.email || "none"}`);
+
+  // 1. Authenticated users attempting to access login/register -> redirect to /documents
   if (isAuthPage) {
-    if (sessionToken) {
-      return NextResponse.redirect(new URL("/documents/123", request.url));
+    if (isLoggedIn) {
+      console.log(`[Auth Middleware Redirect] Authenticated user redirected from ${pathname} to /documents`);
+      return NextResponse.redirect(new URL("/documents", req.url));
     }
     return NextResponse.next();
   }
 
+  // 2. Unauthenticated users attempting to access protected routes -> redirect to /login
   if (isProtectedRoute) {
-    if (!sessionToken) {
-      const loginUrl = new URL("/login", request.url);
+    if (!isLoggedIn) {
+      console.log(`[Auth Middleware Redirect] Unauthenticated request for ${pathname} redirected to /login`);
+      const loginUrl = new URL("/login", req.url);
       loginUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(loginUrl);
     }
@@ -29,7 +34,7 @@ export function middleware(request: NextRequest) {
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: ["/documents/:path*", "/profile/:path*", "/login", "/register"],

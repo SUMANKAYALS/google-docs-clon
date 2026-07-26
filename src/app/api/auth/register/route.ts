@@ -22,12 +22,12 @@ export async function POST(req: Request) {
     }
 
     const { name, email, password } = validation.data;
-    const lowerEmail = email.toLowerCase();
+    const lowerEmail = email.trim().toLowerCase();
 
     await connectToDatabase();
 
     // Check if account already exists
-    const existingUser = await User.findOne({ email: lowerEmail });
+    const existingUser = await User.findOne({ email: lowerEmail }).select("+isVerified");
     if (existingUser) {
       if (existingUser.isVerified) {
         return NextResponse.json(
@@ -39,6 +39,7 @@ export async function POST(req: Request) {
         const hashedPassword = await bcrypt.hash(password, 12);
         existingUser.name = name;
         existingUser.password = hashedPassword;
+        existingUser.isVerified = false;
         await existingUser.save();
       }
     } else {

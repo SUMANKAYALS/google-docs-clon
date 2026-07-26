@@ -4,10 +4,10 @@ import bcrypt from "bcryptjs";
 import { connectToDatabase } from "@/lib/db";
 import { User } from "@/models/User";
 import { loginSchema } from "@/lib/validations/auth";
+import { authConfig } from "@/auth.config";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  trustHost: true,
-
+  ...authConfig,
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -16,81 +16,62 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        console.log("[Auth Authorize] Initiating credential verification...");
         await connectToDatabase();
 
-        // 2. Standard credentials password validation
         const validatedFields = loginSchema.safeParse(credentials);
         if (!validatedFields.success) {
-          throw new Error('Invalid input');
+          console.error("[Auth Authorize Error] Validation failed:", validatedFields.error.issues);
+          throw new Error("Invalid input");
         }
 
-        // Normalize email for lookup
         const email = validatedFields.data.email.trim().toLowerCase();
         const password = validatedFields.data.password;
-        console.log('Authorize: received email', email);
-        console.log('Authorize: attempting user lookup');
+        console.log("[Auth Authorize] Received email for lookup:", email);
 
-        const user = await User.findOne({ email })
-          .select("+password +isVerified");
+        const user = await User.findOne({ email }).select("+password +isVerified");
         if (!user || !user.password) {
-          console.log('Authorize: user not found or missing password');
-          throw new Error('User not found');
+          console.error("[Auth Authorize Error] User not found or missing password for email:", email);
+          throw new Error("User not found");
         }
-        console.log('Authorize: user found', { id: user._id, isVerified: user.isVerified });
+
+        console.log("[Auth Authorize] User record located:", {
+          id: user._id.toString(),
+          email: user.email,
+          isVerified: user.isVerified,
+        });
 
         const isPasswordMatch = await bcrypt.compare(password, user.password);
-        console.log('Authorize: password compare result', isPasswordMatch);
+        console.log("[Auth Authorize] Password match result:", isPasswordMatch);
+
         if (!isPasswordMatch) {
-          throw new Error('Incorrect password');
+          console.error("[Auth Authorize Error] Incorrect password attempt for email:", email);
+          throw new Error("Incorrect password");
         }
 
-        // Enforce email verification constraint
         if (user.isVerified === false) {
-          console.log('Authorize: email not verified');
-          throw new Error('Email not verified');
+          console.error("[Auth Authorize Error] Unverified account login attempt for email:", email);
+          throw new Error("Email not verified");
         }
+
+        console.log("[Auth Authorize Success] Authorization granted for user:", email);
 
         return {
           id: user._id.toString(),
-          name: user.name,
-          email: user.email,
+          name: user.name || "",
+          email: user.email || "",
           image: user.image || "",
-          role: user.role,
+          role: user.role || "user",
         };
       },
     }),
   ],
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
-  callbacks: {
-    async jwt({ token, user, trigger, session }) {
-      if (user) {
-        token.id = user.id;
-        token.name = user.name;
-        token.email = user.email;
-        token.image = user.image;
-      }
-      if (trigger === "update" && session) {
-        token.name = session.user?.name || token.name;
-        token.image = session.user?.image || token.image;
-      }
-      return token;
+  events: {
+    async signIn(message) {
+      console.log("[Auth Event: signIn] Session established for user:", message.user?.email);
     },
-    async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = token.id as string;
-        session.user.name = token.name as string;
-        session.user.email = token.email as string;
-        session.user.image = token.image as string;
-      }
-      return session;
+    async signOut() {
+      console.log("[Auth Event: signOut] User session destroyed.");
     },
   },
-  pages: {
-    signIn: "/login",
-    error: "/login",
-  },
-  secret: process.env.NEXTAUTH_SECRET || "clouds-docs-super-secret-key-change-in-production-12345",
 });
