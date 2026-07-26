@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, useRef, Suspense } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Mail, Loader2, Check, AlertCircle, RefreshCw, Edit2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { AuthLayout } from "@/components/auth/AuthLayout";
+import { AuthCard } from "@/components/auth/AuthCard";
+import { AuthHeader } from "@/components/auth/AuthHeader";
+import { OTPInput } from "@/components/auth/OTPInput";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 function VerifyEmailForm() {
   const router = useRouter();
@@ -48,13 +50,6 @@ function VerifyEmailForm() {
 
     return () => clearInterval(interval);
   }, []);
-
-  // Format seconds to MM:SS
-  const formatTime = (timeInSeconds: number) => {
-    const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = timeInSeconds % 60;
-    return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-  };
 
   // Keyboard navigation & numeric inputs control
   const handleInputChange = (index: number, value: string) => {
@@ -120,8 +115,7 @@ function VerifyEmailForm() {
       }
 
       // Show success message and redirect to login page
-      setSuccess("Email verified successfully! Please log in.");
-      // Short delay to let user see the message before redirecting
+      setSuccess("Email verified successfully! Redirecting to login...");
       setTimeout(() => {
         router.push("/login");
         router.refresh();
@@ -171,130 +165,59 @@ function VerifyEmailForm() {
   };
 
   return (
-    <div className="w-full max-w-md bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-2xl shadow-md p-8 md:p-10 transition-all duration-300">
-      
-      {/* Verify Email Header */}
-      <div className="flex flex-col items-center text-center mb-8">
-        <div className="size-14 rounded-full bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-4 shadow-inner">
-          <Mail className="size-7" />
-        </div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-zinc-100">Verify your Email</h1>
-        <p className="text-sm text-gray-500 dark:text-zinc-400 mt-2 max-w-[280px]">
-          We sent a 6-digit verification code to
-        </p>
-        <span className="text-sm font-semibold text-neutral-800 dark:text-zinc-350 mt-1 select-all break-all">
+    <AuthCard>
+      <AuthHeader
+        title="Verify Your Email"
+        subtitle="We sent a 6-digit verification code to your email address."
+        badgeText="Security Verification"
+      />
+
+      {/* Target Email Banner */}
+      <div className="mb-6 p-3.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/50 text-center">
+        <span className="text-xs text-zinc-500 dark:text-zinc-400">Code sent to: </span>
+        <span className="text-xs font-bold text-blue-600 dark:text-blue-400 select-all break-all">
           {email}
         </span>
       </div>
 
-      {/* Dynamic Alerts */}
+      {/* Alerts */}
       {error && (
-        <div className="mb-6 p-4 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/30 text-rose-800 dark:text-rose-300 text-xs font-semibold rounded-xl flex items-start gap-x-2">
-          <AlertCircle className="size-4 shrink-0 mt-0.5 text-rose-500" />
+        <div className="mb-6 p-4 rounded-xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2.5 animate-in fade-in slide-in-from-top-2 duration-200">
+          <AlertCircle className="size-4 shrink-0 text-rose-500" />
           <span>{error}</span>
         </div>
       )}
 
       {success && (
-        <div className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-250 dark:border-emerald-900/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold rounded-xl flex items-center gap-x-2 animate-in fade-in zoom-in-95">
-          <Check className="size-4 shrink-0 text-emerald-500" />
+        <div className="mb-6 p-4 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2.5 animate-in fade-in slide-in-from-top-2 duration-200">
+          <CheckCircle2 className="size-4 shrink-0 text-emerald-500" />
           <span>{success}</span>
         </div>
       )}
 
-      {/* Code Input Form */}
-      <form onSubmit={handleVerify} className="space-y-6">
-        
-        {/* Verification Inputs Grid */}
-        <div className="flex justify-between gap-x-2 select-none" onPaste={handlePaste}>
-          {otp.map((digit, idx) => (
-            <input
-              key={idx}
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={1}
-              value={digit}
-              onChange={(e) => handleInputChange(idx, e.target.value)}
-              onKeyDown={(e) => handleKeyDown(idx, e)}
-              ref={(el) => {
-                inputRefs.current[idx] = el;
-              }}
-              disabled={loading || expiryTimer <= 0}
-              className="w-12 h-14 text-center text-xl font-bold rounded-xl border border-neutral-300 dark:border-zinc-700 bg-neutral-50 dark:bg-zinc-950 focus:bg-white dark:focus:bg-zinc-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all disabled:opacity-50"
-              aria-label={`OTP Code digit ${idx + 1}`}
-            />
-          ))}
-        </div>
-
-        {/* Expiry Expiration Timer */}
-        {expiryTimer > 0 ? (
-          <div className="text-center text-xs font-medium text-neutral-400 dark:text-zinc-500">
-            Code expires in: <span className="font-bold text-neutral-600 dark:text-zinc-350">{formatTime(expiryTimer)}</span>
-          </div>
-        ) : (
-          <div className="text-center text-xs font-bold text-rose-500">
-            Verification code has expired.
-          </div>
-        )}
-
-        {/* Submit Verify Button */}
-        <Button
-          type="submit"
-          disabled={loading || otp.join("").length !== 6 || expiryTimer <= 0}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-600 dark:hover:bg-blue-500 h-11 rounded-xl text-sm font-semibold transition-all shadow-md active:scale-[0.99] disabled:opacity-50 disabled:scale-100"
-        >
-          {loading ? (
-            <>
-              <Loader2 className="size-4 mr-2 animate-spin" />
-              Verifying...
-            </>
-          ) : (
-            "Verify Email"
-          )}
-        </Button>
-      </form>
-
-      {/* Extra Action Buttons */}
-      <div className="mt-8 pt-6 border-t border-neutral-100 dark:border-zinc-800 flex items-center justify-between text-xs select-none">
-        
-        {/* Resend OTP */}
-        {resendTimer > 0 ? (
-          <span className="text-neutral-400 dark:text-zinc-500 font-medium">
-            Resend in {resendTimer}s
-          </span>
-        ) : (
-          <button
-            type="button"
-            onClick={handleResend}
-            disabled={loading}
-            className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-bold hover:underline flex items-center gap-x-1"
-          >
-            <RefreshCw className="size-3.5" />
-            Resend OTP
-          </button>
-        )}
-
-        {/* Change Email */}
-        <Link
-          href="/register"
-          className="text-neutral-500 hover:text-neutral-700 dark:text-zinc-400 dark:hover:text-zinc-300 font-bold hover:underline flex items-center gap-x-1"
-        >
-          <Edit2 className="size-3.5" />
-          Change Email
-        </Link>
-      </div>
-
-    </div>
+      {/* OTP Input Form Component */}
+      <OTPInput
+        otp={otp}
+        inputRefs={inputRefs}
+        loading={loading}
+        resendTimer={resendTimer}
+        expiryTimer={expiryTimer}
+        onInputChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        onPaste={handlePaste}
+        onVerify={handleVerify}
+        onResend={handleResend}
+      />
+    </AuthCard>
   );
 }
 
 export default function VerifyEmailPage() {
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-[#f8f9fa] dark:bg-[#0c0a09] px-4 transition-colors duration-300">
-      <Suspense fallback={<Loader2 className="size-8 text-blue-600 animate-spin" />}>
+    <AuthLayout>
+      <Suspense fallback={<div className="w-full max-w-md h-96 rounded-3xl bg-zinc-200/50 dark:bg-zinc-800/50 animate-pulse" />}>
         <VerifyEmailForm />
       </Suspense>
-    </div>
+    </AuthLayout>
   );
 }

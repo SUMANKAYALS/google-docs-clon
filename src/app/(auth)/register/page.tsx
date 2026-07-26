@@ -3,11 +3,19 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FileTextIcon, Loader2Icon, LockIcon, MailIcon, UserIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { User, Mail, AlertCircle, CheckCircle2 } from "lucide-react";
+import { AuthLayout } from "@/components/auth/AuthLayout";
+import { AuthCard } from "@/components/auth/AuthCard";
+import { AuthHeader } from "@/components/auth/AuthHeader";
+import { AuthInput } from "@/components/auth/AuthInput";
+import { PasswordInput } from "@/components/auth/PasswordInput";
+import { PasswordStrength } from "@/components/auth/PasswordStrength";
+import { SubmitButton } from "@/components/auth/SubmitButton";
+import { SocialLoginButton } from "@/components/auth/SocialLoginButton";
+import { Divider } from "@/components/auth/Divider";
 import { registerSchema } from "@/lib/validations/auth";
 import { registerUserAction } from "@/actions/auth-actions";
+import { signIn } from "next-auth/react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -32,120 +40,114 @@ export default function RegisterPage() {
 
     setLoading(true);
 
-    const res = await registerUserAction({ name, email, password });
-    setLoading(false);
+    try {
+      const res = await registerUserAction({ name, email, password });
+      setLoading(false);
 
-    if (res.error) {
-      setError(res.error);
-    } else {
-      setSuccess("Account created successfully! Redirecting to sign in...");
-      setTimeout(() => {
-        router.push(`/verify-email?email=${email}`);
-      }, 1500);
+      if (res?.error) {
+        setError(res.error);
+      } else {
+        setSuccess("Account created successfully! Redirecting to verification...");
+        setTimeout(() => {
+          router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+        }, 1500);
+      }
+    } catch (err) {
+      console.error("[Register Error]", err);
+      setError("An unexpected error occurred. Please try again.");
+      setLoading(false);
     }
   };
 
+  const handleGoogleSignUp = () => {
+    signIn("google", { callbackUrl: "/documents" });
+  };
+
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-[#FAFBFD] px-4">
-      <div className="w-full max-w-md bg-white border border-neutral-200 rounded-xl shadow-sm p-8">
-        <div className="flex flex-col items-center mb-6">
-          <div className="size-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 mb-3">
-            <FileTextIcon className="size-6" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">Create your Account</h1>
-          <p className="text-sm text-gray-500 mt-1">Start collaborating with Clouds Docs</p>
-        </div>
+    <AuthLayout>
+      <AuthCard>
+        <AuthHeader
+          title="Create Your Account"
+          subtitle="Start collaborating in real-time with your team on Clouds Docs."
+          badgeText="Free Tier Included"
+        />
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">
-            {error}
+          <div className="mb-6 p-4 rounded-xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2.5 animate-in fade-in slide-in-from-top-2 duration-200">
+            <AlertCircle className="size-4 shrink-0 text-rose-500" />
+            <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg">
-            {success}
+          <div className="mb-6 p-4 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2.5 animate-in fade-in slide-in-from-top-2 duration-200">
+            <CheckCircle2 className="size-4 shrink-0 text-emerald-500" />
+            <span>{success}</span>
           </div>
         )}
 
+        {/* Google Signup Button */}
+        <SocialLoginButton onClick={handleGoogleSignUp} label="Sign up with Google" />
+
+        <Divider />
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="name">
-              Full Name
-            </label>
-            <div className="relative">
-              <UserIcon className="absolute left-3 top-2.5 size-4 text-gray-400" />
-              <Input
-                id="name"
-                type="text"
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="pl-9"
-                required
-              />
-            </div>
-          </div>
+          {/* Full Name */}
+          <AuthInput
+            id="name"
+            label="Full Name"
+            type="text"
+            placeholder="John Doe"
+            icon={User}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email">
-              Email Address
-            </label>
-            <div className="relative">
-              <MailIcon className="absolute left-3 top-2.5 size-4 text-gray-400" />
-              <Input
-                id="email"
-                type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-9"
-                required
-              />
-            </div>
-          </div>
+          {/* Email Address */}
+          <AuthInput
+            id="email"
+            label="Work Email"
+            type="email"
+            placeholder="name@company.com"
+            icon={Mail}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="password">
-              Password
-            </label>
-            <div className="relative">
-              <LockIcon className="absolute left-3 top-2.5 size-4 text-gray-400" />
-              <Input
-                id="password"
-                type="password"
-                placeholder="At least 6 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="pl-9"
-                required
-              />
-            </div>
-          </div>
+          {/* Password Input */}
+          <PasswordInput
+            id="password"
+            label="Password"
+            placeholder="At least 6 characters"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 font-medium h-10"
-          >
-            {loading ? (
-              <>
-                <Loader2Icon className="size-4 mr-2 animate-spin" />
-                Creating account...
-              </>
-            ) : (
-              "Register"
-            )}
-          </Button>
+          {/* Password Strength Meter */}
+          <PasswordStrength password={password} />
+
+          {/* Submit CTA Button */}
+          <div className="pt-2">
+            <SubmitButton loading={loading} loadingText="Creating account...">
+              Create Account
+            </SubmitButton>
+          </div>
         </form>
 
-        <div className="mt-6 text-center text-sm text-gray-600">
+        {/* Footer Link */}
+        <div className="mt-8 text-center text-xs font-medium text-zinc-500 dark:text-zinc-400">
           Already have an account?{" "}
-          <Link href="/login" className="text-blue-600 font-semibold hover:underline">
-            Sign in here
+          <Link
+            href="/login"
+            className="font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors hover:underline"
+          >
+            Sign in
           </Link>
         </div>
-      </div>
-    </div>
+      </AuthCard>
+    </AuthLayout>
   );
 }

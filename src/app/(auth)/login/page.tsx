@@ -2,20 +2,26 @@
 
 import React, { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { FileTextIcon, Loader2Icon, LockIcon, MailIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Mail, AlertCircle } from "lucide-react";
+import { AuthLayout } from "@/components/auth/AuthLayout";
+import { AuthCard } from "@/components/auth/AuthCard";
+import { AuthHeader } from "@/components/auth/AuthHeader";
+import { AuthInput } from "@/components/auth/AuthInput";
+import { PasswordInput } from "@/components/auth/PasswordInput";
+import { SubmitButton } from "@/components/auth/SubmitButton";
+import { SocialLoginButton } from "@/components/auth/SocialLoginButton";
+import { Divider } from "@/components/auth/Divider";
 import { loginSchema } from "@/lib/validations/auth";
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams?.get("callbackUrl") || "/documents";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -32,112 +38,128 @@ function LoginForm() {
     setLoading(true);
 
     try {
+      console.log("[Client Login] Initiating signIn credentials request...");
       const res = await signIn("credentials", {
         email,
         password,
         redirect: false,
       });
 
+      console.log("[Client Login Response]", res);
+
       if (res?.error) {
-        // Display the specific error returned by authorize()
         setError(res.error);
         setLoading(false);
+      } else if (res?.ok) {
+        console.log("[Client Login Success] Redirecting to:", callbackUrl);
+        // Hard window navigation ensures Next.js App Router cache is purged and cookies are synced
+        window.location.href = callbackUrl;
       } else {
-        router.push(callbackUrl);
-        router.refresh();
+        setError("Sign in failed. Please check your credentials.");
+        setLoading(false);
       }
     } catch (err) {
-      console.error("Sign in error:", err);
+      console.error("[Client Login Error]", err);
       setError("An unexpected error occurred. Please try again.");
       setLoading(false);
     }
   };
 
+  const handleGoogleSignIn = () => {
+    signIn("google", { callbackUrl });
+  };
+
   return (
-    <div className="w-full max-w-md bg-white border border-neutral-200 rounded-xl shadow-sm p-8">
-      <div className="flex flex-col items-center mb-6">
-        <div className="size-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 mb-3">
-          <FileTextIcon className="size-6" />
-        </div>
-        <h1 className="text-2xl font-bold text-gray-900">Sign in to Clouds Docs</h1>
-        <p className="text-sm text-gray-500 mt-1">Access your documents and collaborative workspace</p>
-      </div>
+    <AuthCard>
+      <AuthHeader
+        title="Welcome Back"
+        subtitle="Sign in to your account to access your workspace and collaborative documents."
+        badgeText="Next.js 15 Fast Auth"
+      />
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">
-          {error}
+        <div className="mb-6 p-4 rounded-xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/40 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2.5 animate-in fade-in slide-in-from-top-2 duration-200">
+          <AlertCircle className="size-4 shrink-0 text-rose-500" />
+          <span>{error}</span>
         </div>
       )}
 
+      {/* Social Google Login */}
+      <SocialLoginButton onClick={handleGoogleSignIn} label="Sign in with Google" />
+
+      <Divider />
+
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email">
-            Email Address
-          </label>
-          <div className="relative">
-            <MailIcon className="absolute left-3 top-2.5 size-4 text-gray-400" />
-            <Input
-              id="email"
-              type="email"
-              placeholder="name@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="pl-9"
-              required
+        {/* Email Address */}
+        <AuthInput
+          id="email"
+          label="Email Address"
+          type="email"
+          placeholder="name@company.com"
+          icon={Mail}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+
+        {/* Password Input */}
+        <PasswordInput
+          id="password"
+          label="Password"
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+
+        {/* Options Row: Remember Me & Forgot Password */}
+        <div className="flex items-center justify-between pt-1 text-xs">
+          <label className="flex items-center gap-2 font-medium text-zinc-600 dark:text-zinc-400 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="size-4 rounded border-zinc-300 dark:border-zinc-700 text-blue-600 focus:ring-blue-500/20 bg-zinc-50 dark:bg-zinc-950 transition-colors"
             />
-          </div>
+            <span>Remember me</span>
+          </label>
+
+          <Link
+            href="/forgot-password"
+            className="font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors hover:underline"
+          >
+            Forgot password?
+          </Link>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="password">
-            Password
-          </label>
-          <div className="relative">
-            <LockIcon className="absolute left-3 top-2.5 size-4 text-gray-400" />
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="pl-9"
-              required
-            />
-          </div>
+        {/* Submit Button */}
+        <div className="pt-2">
+          <SubmitButton loading={loading} loadingText="Signing in...">
+            Sign In to Account
+          </SubmitButton>
         </div>
-
-        <Button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 font-medium h-10"
-        >
-          {loading ? (
-            <>
-              <Loader2Icon className="size-4 mr-2 animate-spin" />
-              Signing in...
-            </>
-          ) : (
-            "Sign In"
-          )}
-        </Button>
       </form>
 
-      <div className="mt-6 text-center text-sm text-gray-600">
+      {/* Footer Switcher Link */}
+      <div className="mt-8 text-center text-xs font-medium text-zinc-500 dark:text-zinc-400">
         Don&apos;t have an account?{" "}
-        <Link href="/register" className="text-blue-600 font-semibold hover:underline">
-          Register here
+        <Link
+          href="/register"
+          className="font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors hover:underline"
+        >
+          Create account
         </Link>
       </div>
-    </div>
+    </AuthCard>
   );
 }
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-[#FAFBFD] px-4">
-      <Suspense fallback={<Loader2Icon className="size-8 text-blue-600 animate-spin" />}>
+    <AuthLayout>
+      <Suspense fallback={<div className="w-full max-w-md h-96 rounded-3xl bg-zinc-200/50 dark:bg-zinc-800/50 animate-pulse" />}>
         <LoginForm />
       </Suspense>
-    </div>
+    </AuthLayout>
   );
 }
