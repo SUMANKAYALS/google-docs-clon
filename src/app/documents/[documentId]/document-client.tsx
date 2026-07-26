@@ -12,6 +12,7 @@ import dynamic from "next/dynamic";
 import { useEditorStore } from "@/store/use-editor-store";
 import { Navbar, SaveStatus } from "./navbar";
 import { Editor } from "./editor";
+import { updateDocumentMarginsAction } from "@/actions/document-actions";
 
 const AISidebar = dynamic(() => import("@/components/ai/ai-sidebar").then((mod) => mod.AISidebar), {
   ssr: false,
@@ -36,6 +37,24 @@ export function DocumentClient({ document: initialDocument }: DocumentClientProp
   const [yDoc, setYDoc] = useState<Y.Doc | null>(null);
   const [provider, setProvider] = useState<WebsocketProvider | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  const [leftMargin, setLeftMargin] = useState(initialDocument.leftMargin ?? 56);
+  const [rightMargin, setRightMargin] = useState(initialDocument.rightMargin ?? 56);
+
+  useEffect(() => {
+    if (initialDocument.leftMargin !== undefined) {
+      setLeftMargin(initialDocument.leftMargin);
+    }
+    if (initialDocument.rightMargin !== undefined) {
+      setRightMargin(initialDocument.rightMargin);
+    }
+  }, [initialDocument.leftMargin, initialDocument.rightMargin]);
+
+  const handleMarginsChange = useCallback(async (left: number, right: number) => {
+    setLeftMargin(left);
+    setRightMargin(right);
+    await updateDocumentMarginsAction(initialDocument.id, left, right);
+  }, [initialDocument.id]);
 
   const handleEditorReady = useCallback(() => {
     setIsLoaded(true);
@@ -536,6 +555,9 @@ export function DocumentClient({ document: initialDocument }: DocumentClientProp
         provider={provider}
         currentUser={currentUser}
         isEditable={isEditable}
+        leftMargin={leftMargin}
+        rightMargin={rightMargin}
+        onMarginsChange={handleMarginsChange}
         onAIAction={(action, selection) => {
           openAIAssistant({
             prompt: `Help me ${action} this text: ${selection}`,

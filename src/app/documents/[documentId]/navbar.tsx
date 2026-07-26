@@ -13,6 +13,7 @@ import {
   RefreshCwIcon,
 } from "lucide-react";
 import { UserAvatarMenu } from "@/components/user-avatar-menu";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { InvitationsDropdown } from "@/components/notifications/invitations-dropdown";
 import {
   CollaborationPresence,
@@ -77,7 +78,7 @@ export const Navbar = React.memo(({
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-neutral-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 print:hidden">
+    <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--header-bg)] print:hidden">
       <div className="flex flex-col gap-3 px-3 py-3 lg:px-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -87,7 +88,7 @@ export const Navbar = React.memo(({
               </div>
             </Link>
 
-            <div className="flex size-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600 shadow-sm">
+            <div className="flex size-9 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 shadow-sm">
               <FileTextIcon className="size-5" />
             </div>
 
@@ -104,13 +105,13 @@ export const Navbar = React.memo(({
                         handleTitleSubmit();
                       }
                     }}
-                    className="min-w-0 rounded border border-blue-500 bg-blue-50/50 px-1 text-base font-semibold text-gray-900 focus:outline-none"
+                    className="min-w-0 rounded border border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 px-1 text-base font-semibold text-gray-900 dark:text-zinc-100 focus:outline-none"
                     autoFocus
                   />
                 ) : (
                   <h1
                     onClick={() => setIsEditing(true)}
-                    className="cursor-pointer rounded px-1 text-base font-semibold text-gray-900 transition-colors hover:bg-neutral-100"
+                    className="cursor-pointer rounded px-1 text-base font-semibold text-gray-900 dark:text-zinc-100 transition-colors hover:bg-neutral-100 dark:hover:bg-zinc-800"
                   >
                     {title}
                   </h1>
@@ -120,7 +121,7 @@ export const Navbar = React.memo(({
                   type="button"
                   onClick={handleFavoriteToggle}
                   aria-label={isFavorite ? "Unstar document" : "Star document"}
-                  className="rounded p-1 transition-colors hover:bg-neutral-100"
+                  className="rounded p-1 transition-colors hover:bg-neutral-100 dark:hover:bg-zinc-800"
                 >
                   <StarIcon
                     className={`size-4 ${isFavorite ? "fill-amber-400 text-amber-400" : "text-gray-400"
@@ -129,7 +130,7 @@ export const Navbar = React.memo(({
                 </button>
               </div>
 
-              <div className="flex items-center gap-1.5 text-xs text-gray-500">
+              <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-zinc-400">
                 {saveStatus === "saving" && (
                   <span className="flex items-center font-medium text-amber-600">
                     <CloudUploadIcon className="mr-1 size-3.5 animate-pulse" />
@@ -182,6 +183,7 @@ export const Navbar = React.memo(({
               onLeaveCollaboration={onLeaveCollaboration}
             />
             <InvitationsDropdown />
+            <ThemeToggle />
             <UserAvatarMenu />
           </div>
         </div>

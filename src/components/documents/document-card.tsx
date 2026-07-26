@@ -64,11 +64,11 @@ export const DocumentCard = React.memo(({
 
   return (
     <>
-      <div className="group relative bg-white border border-neutral-200 rounded-xl hover:shadow-md transition-all flex flex-col justify-between p-4 overflow-hidden">
+      <div className="group relative bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-xl hover:shadow-md transition-all flex flex-col justify-between p-4 overflow-hidden">
         <div>
           {/* Header row */}
           <div className="flex items-center justify-between mb-3">
-            <div className="size-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+            <div className="size-10 rounded-lg bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 flex items-center justify-center">
               <FileTextIcon className="size-5" />
             </div>
 
@@ -77,7 +77,7 @@ export const DocumentCard = React.memo(({
                 type="button"
                 onClick={() => onFavoriteToggle(document.id)}
                 aria-label={document.isFavorite ? "Unstar document" : "Star document"}
-                className="p-1 rounded-full text-gray-400 hover:text-amber-500 hover:bg-neutral-100 transition-colors"
+                className="p-1 rounded-full text-gray-400 hover:text-amber-500 hover:bg-neutral-100 dark:hover:bg-zinc-800 transition-colors"
               >
                 <StarIcon
                   className={`size-4 ${
@@ -91,7 +91,7 @@ export const DocumentCard = React.memo(({
                   <button
                     type="button"
                     aria-label="Document options"
-                    className="p-1 rounded-full text-gray-400 hover:text-gray-700 hover:bg-neutral-100 transition-colors"
+                    className="p-1 rounded-full text-gray-400 hover:text-gray-700 dark:hover:text-zinc-200 hover:bg-neutral-100 dark:hover:bg-zinc-800 transition-colors"
                   >
                     <MoreVerticalIcon className="size-4" />
                   </button>
@@ -138,14 +138,14 @@ export const DocumentCard = React.memo(({
           {/* Title Link */}
           <Link
             href={`/documents/${document.id}`}
-            className="block text-base font-semibold text-gray-900 hover:text-blue-600 line-clamp-1 mb-1 transition-colors"
+            className="block text-base font-semibold text-gray-900 dark:text-zinc-100 hover:text-blue-600 dark:hover:text-blue-400 line-clamp-1 mb-1 transition-colors"
           >
             {document.title}
           </Link>
         </div>
 
         {/* Footer date info */}
-        <div className="mt-4 pt-3 border-t border-neutral-100 flex items-center justify-between text-xs text-gray-500">
+        <div className="mt-4 pt-3 border-t border-neutral-100 dark:border-zinc-800 flex items-center justify-between text-xs text-gray-500 dark:text-zinc-400">
           <span>Edited {formattedDate}</span>
         </div>
       </div>

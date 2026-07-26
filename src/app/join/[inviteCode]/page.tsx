@@ -24,13 +24,13 @@ export default async function JoinPage({ params }: JoinPageProps) {
 
   if (!res.success || !res.document) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAFBFD] px-4">
-        <div className="max-w-md w-full bg-white border border-neutral-200 rounded-2xl p-8 text-center space-y-4 shadow-sm">
-          <div className="size-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--editor-workspace)] px-4">
+        <div className="max-w-md w-full bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-2xl p-8 text-center space-y-4 shadow-sm">
+          <div className="size-12 rounded-full bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 flex items-center justify-center mx-auto">
             <span className="font-bold text-lg">!</span>
           </div>
-          <h1 className="text-xl font-bold text-gray-900">Invalid Invite Link</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-xl font-bold text-gray-900 dark:text-zinc-100">Invalid Invite Link</h1>
+          <p className="text-sm text-gray-500 dark:text-zinc-400">
             {res.error || "This document invite link is invalid or has expired."}
           </p>
           <Link

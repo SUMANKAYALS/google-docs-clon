@@ -8,7 +8,7 @@ import { DocumentModel } from "@/models/Document";
 import { generateInviteCode } from "@/lib/invite-code";
 import { type DocumentItem, type UserRole } from "@/types";
 
-export async function createDocumentAction(initialTitle?: string) {
+export async function createDocumentAction(initialTitle?: string, initialContent?: string) {
   try {
     const session = await auth();
     if (!session || !session.user?.id) {
@@ -19,7 +19,7 @@ export async function createDocumentAction(initialTitle?: string) {
 
     const newDoc = await DocumentModel.create({
       title: initialTitle?.trim() || "Untitled Document",
-      content: "",
+      content: initialContent || "",
       owner: session.user.id,
       collaborators: [],
       collaboratorMembers: [],
@@ -44,6 +44,8 @@ export async function createDocumentAction(initialTitle?: string) {
         isFavorite: newDoc.isFavorite,
         createdAt: newDoc.createdAt.toISOString(),
         updatedAt: newDoc.updatedAt.toISOString(),
+        leftMargin: newDoc.leftMargin,
+        rightMargin: newDoc.rightMargin,
       } as DocumentItem,
     };
   } catch (error) {
@@ -122,6 +124,8 @@ export async function getUserDocumentsAction(
         isFavorite: doc.isFavorite,
         createdAt: doc.createdAt.toISOString(),
         updatedAt: doc.updatedAt.toISOString(),
+        leftMargin: doc.leftMargin,
+        rightMargin: doc.rightMargin,
       };
     });
 
@@ -183,6 +187,8 @@ export async function getDocumentByIdAction(documentId: string) {
       isFavorite: doc.isFavorite,
       createdAt: doc.createdAt.toISOString(),
       updatedAt: doc.updatedAt.toISOString(),
+      leftMargin: doc.leftMargin,
+      rightMargin: doc.rightMargin,
     };
 
     return { success: true, document };
@@ -445,6 +451,8 @@ export async function duplicateDocumentAction(documentId: string) {
         isFavorite: duplicateDoc.isFavorite,
         createdAt: duplicateDoc.createdAt.toISOString(),
         updatedAt: duplicateDoc.updatedAt.toISOString(),
+        leftMargin: duplicateDoc.leftMargin,
+        rightMargin: duplicateDoc.rightMargin,
       } as DocumentItem,
     };
   } catch (error) {
@@ -491,5 +499,47 @@ export async function leaveDocumentAction(documentId: string) {
   } catch (error) {
     console.error("Leave Document Error:", error);
     return { error: "Failed to leave document collaboration" };
+  }
+}
+
+export async function updateDocumentMarginsAction(documentId: string, leftMargin: number, rightMargin: number) {
+  try {
+    const session = await auth();
+    if (!session || !session.user?.id) {
+      return { error: "Unauthorized" };
+    }
+
+    if (!isValidObjectId(documentId)) {
+      return { error: "Invalid document ID" };
+    }
+
+    await connectToDatabase();
+
+    const doc = await DocumentModel.findById(documentId);
+    if (!doc) {
+      return { error: "Document not found" };
+    }
+
+    const isOwner = doc.owner.toString() === session.user.id;
+    const member = doc.collaboratorMembers?.find(
+      (m) => m.userId.toString() === session.user.id
+    );
+    const isEditor = isOwner || member?.role === "editor";
+
+    if (!isEditor) {
+      return { error: "Forbidden: You do not have permission to edit this document" };
+    }
+
+    doc.leftMargin = leftMargin;
+    doc.rightMargin = rightMargin;
+    doc.updatedBy = new mongoose.Types.ObjectId(session.user.id);
+    await doc.save();
+
+    revalidatePath(`/documents/${documentId}`);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Update Document Margins Error:", error);
+    return { error: "Failed to update margins" };
   }
 }

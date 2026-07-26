@@ -18,8 +18,8 @@ export const ToolbarButton = React.memo(({
             title={label}
             aria-pressed={isActive}
             className={cn(
-                "text-sm h-7 min-w-7 flex items-center justify-center rounded-sm hover:bg-neutral-200/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors",
-                isActive && "bg-neutral-200/80 text-primary"
+                "text-sm h-7 min-w-7 flex items-center justify-center rounded-sm hover:bg-neutral-200/80 dark:hover:bg-zinc-700/80 text-gray-700 dark:text-zinc-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors",
+                isActive && "bg-neutral-200/80 dark:bg-zinc-700/80 text-primary dark:text-zinc-100"
             )}
         >
             <Icon className="size-4 shrink-0" />

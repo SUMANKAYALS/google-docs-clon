@@ -56,6 +56,8 @@ export interface InvitationItem {
 export interface EditorState {
   editor: Editor | null;
   setEditor: (editor: Editor | null) => void;
+  pageTheme: "light" | "dark";
+  setPageTheme: (theme: "light" | "dark") => void;
 }
 
 export interface ToolbarButtonProps {
@@ -88,4 +90,6 @@ export interface DocumentItem {
   isFavorite: boolean;
   createdAt: string;
   updatedAt: string;
+  leftMargin?: number;
+  rightMargin?: number;
 }

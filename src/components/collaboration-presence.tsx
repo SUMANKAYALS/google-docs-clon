@@ -37,7 +37,7 @@ export const CollaborationPresence = React.memo(({
   return (
     <div className="flex items-center gap-x-2 select-none">
       {/* Status indicator badge */}
-      <div className="flex items-center gap-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-neutral-100 border border-neutral-200">
+      <div className="flex items-center gap-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-neutral-100 dark:bg-zinc-850 border border-neutral-200 dark:border-zinc-800">
         <span
           className={`size-2 rounded-full ${connectionStatus === "connected"
             ? "bg-emerald-500 animate-pulse"
@@ -46,7 +46,7 @@ export const CollaborationPresence = React.memo(({
               : "bg-red-500"
             }`}
         />
-        <span className="text-gray-700 capitalize">
+        <span className="text-gray-700 dark:text-zinc-300 capitalize">
           {connectionStatus === "connected"
             ? "Live Sync"
             : connectionStatus === "connecting"
@@ -74,7 +74,7 @@ export const CollaborationPresence = React.memo(({
               title={`${user.name}${user.isTyping ? " (Typing...)" : ""}${user.isPointerActive ? " • Mouse activity" : ""}${user.lastActiveAt ? ` • ${formatLastActive(user.lastActiveAt)}` : ""}`}
             >
               <Avatar
-                className="size-8 border-2 shadow-sm transition-all"
+                className="size-8 border-2 shadow-sm transition-all dark:border-zinc-900"
                 style={{ borderColor: user.color }}
               >
                 <AvatarImage src={user.image || undefined} alt={user.name} />
@@ -92,8 +92,8 @@ export const CollaborationPresence = React.memo(({
       </div>
 
       {inactiveCollaborators.length > 0 && (
-        <div className="flex items-center gap-x-1 text-[11px] text-gray-500">
-          <span className="size-2 rounded-full bg-gray-300" />
+        <div className="flex items-center gap-x-1 text-[11px] text-gray-500 dark:text-zinc-400">
+          <span className="size-2 rounded-full bg-gray-300 dark:bg-zinc-700" />
           <span>{inactiveCollaborators.length} offline</span>
         </div>
       )}

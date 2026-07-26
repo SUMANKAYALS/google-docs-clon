@@ -28,6 +28,8 @@ import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 
 import { useEditorStore } from "@/store/use-editor-store";
+import { IndentParagraph } from "@/extensions/indent";
+import { Ruler } from "./ruler";
 import { FontSizeExtension } from "@/extensions/font-size";
 import { LineHeightExtension } from "@/extensions/line-height";
 import { LiveMousePointers } from "@/components/live-mouse-pointers";
@@ -47,6 +49,9 @@ interface EditorProps {
     } | null;
     isEditable?: boolean;
     onAIAction?: (action: "rewrite" | "improve" | "summarize" | "translate" | "expand" | "shorten" | "explain" | "continue", selection: string) => void;
+    leftMargin?: number;
+    rightMargin?: number;
+    onMarginsChange?: (left: number, right: number) => void;
 }
 
 export const Editor = React.memo(({
@@ -58,9 +63,21 @@ export const Editor = React.memo(({
     currentUser,
     isEditable = true,
     onAIAction,
+    leftMargin = 56,
+    rightMargin = 56,
+    onMarginsChange = () => {},
 }: EditorProps) => {
     const setEditor = useEditorStore((state) => state.setEditor);
+    const pageTheme = useEditorStore((state) => state.pageTheme);
+    const setPageTheme = useEditorStore((state) => state.setPageTheme);
     const [selectionText, setSelectionText] = useState("");
+
+    React.useEffect(() => {
+        const saved = localStorage.getItem("clouds-docs-page-theme");
+        if (saved === "light" || saved === "dark") {
+            setPageTheme(saved);
+        }
+    }, [setPageTheme]);
 
     const parsedContent = React.useMemo(() => {
         if (!initialContent || initialContent.trim() === "") return "";
@@ -99,7 +116,9 @@ export const Editor = React.memo(({
     const extensions = [
         StarterKit.configure({
             history: yDoc ? false : {},
+            paragraph: false,
         }),
+        IndentParagraph,
         yDoc
             ? Collaboration.configure({
                 document: yDoc,
@@ -164,7 +183,7 @@ export const Editor = React.memo(({
         editorProps: {
             attributes: {
                 style: "padding-left: 56px; padding-right: 56px;",
-                class: "focus:outline-none print:border-0 bg-white border border-[#C7C7C7] flex flex-col min-h-[1054px] w-[816px] pt-10 pr-14 pb-10 cursor-text shadow-sm",
+                class: "focus:outline-none print:border-0 bg-[var(--editor-paper)] border border-[#C7C7C7] dark:border-zinc-850 text-[var(--editor-text)] flex flex-col min-h-[1054px] w-[816px] pt-10 pr-14 pb-10 cursor-text shadow-sm",
             },
         },
         extensions,
@@ -215,10 +234,27 @@ export const Editor = React.memo(({
     const containerRef = React.useRef<HTMLDivElement | null>(null);
 
     return (
-        <div className="size-full overflow-x-auto bg-[#F9FBFD] px-4 print:p-0 print:bg-white print:overflow-visible flex flex-col items-center">
+        <div className="size-full overflow-x-auto bg-[var(--editor-workspace)] px-4 print:p-0 print:bg-white print:overflow-visible flex flex-col items-center">
+            <style dangerouslySetInnerHTML={{__html: `
+                .tiptap {
+                    padding-left: ${leftMargin}px !important;
+                    padding-right: ${rightMargin}px !important;
+                }
+                @media print {
+                    .tiptap {
+                        padding-left: 0px !important;
+                        padding-right: 0px !important;
+                    }
+                }
+            `}} />
+
+            <div className="w-[816px] shrink-0 mt-4">
+                <Ruler leftMargin={leftMargin} rightMargin={rightMargin} onMarginsChange={onMarginsChange} />
+            </div>
+
             <div
                 ref={containerRef}
-                className="relative min-w-max flex justify-center w-[816px] py-4 print:py-0 mx-auto print:w-full print:min-w-0"
+                className="relative min-w-max flex justify-center w-[816px] pb-4 pt-1 print:py-0 mx-auto print:w-full print:min-w-0"
             >
                 <LiveMousePointers
                     containerRef={containerRef}
@@ -226,7 +262,9 @@ export const Editor = React.memo(({
                     currentUser={currentUser}
                 />
                 <SelectionMenu selection={selectionText} onAction={(action) => onAIAction?.(action, selectionText)} />
-                <EditorContent editor={editor} />
+                <div className={pageTheme === "light" ? "page-theme-light" : "page-theme-dark"}>
+                    <EditorContent editor={editor} />
+                </div>
             </div>
         </div>
     );

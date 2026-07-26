@@ -59,7 +59,7 @@ export const ImageButton = React.memo(() => {
                         type="button"
                         aria-label="Insert image"
                         title="Insert image"
-                        className="h-7 min-w-7 shrink-0 flex flex-col items-center justify-center rounded-sm hover:bg-neutral-200/80 overflow-hidden text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
+                        className="h-7 min-w-7 shrink-0 flex flex-col items-center justify-center rounded-sm hover:bg-neutral-200/80 dark:hover:bg-zinc-700/80 text-gray-700 dark:text-zinc-300 overflow-hidden text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
                     >
                         <ImageIcon className="size-4" />
                     </button>
@@ -75,9 +75,9 @@ export const ImageButton = React.memo(() => {
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
-
+ 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="bg-white text-black opacity-100 z-50">
+                <DialogContent className="bg-white dark:bg-zinc-900 text-black dark:text-zinc-100 opacity-100 z-50 border-neutral-200 dark:border-zinc-800">
                     <DialogHeader>
                         <DialogTitle>Insert image URL</DialogTitle>
                     </DialogHeader>

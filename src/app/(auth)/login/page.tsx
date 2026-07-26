@@ -39,7 +39,8 @@ function LoginForm() {
       });
 
       if (res?.error) {
-        setError("Invalid email or password");
+        // Display the specific error returned by authorize()
+        setError(res.error);
         setLoading(false);
       } else {
         router.push(callbackUrl);

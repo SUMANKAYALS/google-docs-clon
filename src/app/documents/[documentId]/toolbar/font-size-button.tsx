@@ -66,7 +66,7 @@ export const FontSizeButton = React.memo(() => {
                 onClick={decrement}
                 aria-label="Decrease font size"
                 title="Decrease font size"
-                className="h-7 w-7 shrink-0 flex items-center justify-center rounded-sm hover:bg-neutral-200/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
+                className="h-7 w-7 shrink-0 flex items-center justify-center rounded-sm hover:bg-neutral-200/80 dark:hover:bg-zinc-700/80 text-gray-700 dark:text-zinc-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
             >
                 <MinusIcon className="size-4" />
             </button>
@@ -78,7 +78,7 @@ export const FontSizeButton = React.memo(() => {
                     onBlur={handleInputBlur}
                     onKeyDown={handleKeyDown}
                     aria-label="Font size input"
-                    className="h-7 w-10 text-sm text-center border border-neutral-400 rounded-sm bg-transparent focus:outline-none focus:ring-1 focus:ring-ring"
+                    className="h-7 w-10 text-sm text-center border border-neutral-400 dark:border-zinc-700 rounded-sm bg-transparent text-gray-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-ring"
                 />
             ) : (
                 <button
@@ -89,7 +89,7 @@ export const FontSizeButton = React.memo(() => {
                     }}
                     aria-label={`Font size ${currentFontSize}`}
                     title="Font size"
-                    className="h-7 w-10 text-sm rounded-sm text-center border border-neutral-400 hover:bg-neutral-200/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
+                    className="h-7 w-10 text-sm rounded-sm text-center border border-neutral-400 dark:border-zinc-700 hover:bg-neutral-200/80 dark:hover:bg-zinc-700/80 text-gray-900 dark:text-zinc-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
                 >
                     {currentFontSize}
                 </button>
@@ -99,7 +99,7 @@ export const FontSizeButton = React.memo(() => {
                 onClick={increment}
                 aria-label="Increase font size"
                 title="Increase font size"
-                className="h-7 w-7 shrink-0 flex items-center justify-center rounded-sm hover:bg-neutral-200/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
+                className="h-7 w-7 shrink-0 flex items-center justify-center rounded-sm hover:bg-neutral-200/80 dark:hover:bg-zinc-700/80 text-gray-700 dark:text-zinc-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
             >
                 <PlusIcon className="size-4" />
             </button>

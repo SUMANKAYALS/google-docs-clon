@@ -43,3 +43,22 @@ export async function updateProfileAction(data: UpdateProfileInput) {
     return { error: "An unexpected network error occurred" };
   }
 }
+
+export async function getUserProfileAction() {
+  try {
+    const res = await fetch("/api/auth/profile", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const result = await res.json();
+    if (!res.ok) {
+      return { error: result.error || "Failed to retrieve profile" };
+    }
+
+    return { success: true, user: result.user, statistics: result.statistics };
+  } catch (error) {
+    console.error("Get Profile Error:", error);
+    return { error: "An unexpected network error occurred" };
+  }
+}

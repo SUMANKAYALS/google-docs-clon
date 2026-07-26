@@ -14,23 +14,38 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const validatedFields = loginSchema.safeParse(credentials);
-        if (!validatedFields.success) {
-          return null;
-        }
-
-        const { email, password } = validatedFields.data;
-
         await connectToDatabase();
 
-        const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
-        if (!user || !user.password) {
-          return null;
+        // 2. Standard credentials password validation
+        const validatedFields = loginSchema.safeParse(credentials);
+        if (!validatedFields.success) {
+          throw new Error('Invalid input');
         }
 
+        // Normalize email for lookup
+        const email = validatedFields.data.email.trim().toLowerCase();
+        const password = validatedFields.data.password;
+        console.log('Authorize: received email', email);
+        console.log('Authorize: attempting user lookup');
+
+        const user = await User.findOne({ email })
+          .select("+password +isVerified");
+        if (!user || !user.password) {
+          console.log('Authorize: user not found or missing password');
+          throw new Error('User not found');
+        }
+        console.log('Authorize: user found', { id: user._id, isVerified: user.isVerified });
+
         const isPasswordMatch = await bcrypt.compare(password, user.password);
+        console.log('Authorize: password compare result', isPasswordMatch);
         if (!isPasswordMatch) {
-          return null;
+          throw new Error('Incorrect password');
+        }
+
+        // Enforce email verification constraint
+        if (user.isVerified === false) {
+          console.log('Authorize: email not verified');
+          throw new Error('Email not verified');
         }
 
         return {

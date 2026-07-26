@@ -159,16 +159,16 @@ export const ActionToolbar = React.memo(({ documentId, documentTitle }: ActionTo
     }, [documentId, documentTitle, editor]);
 
     return (
-        <div className="flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50/90 px-1.5 py-1 shadow-sm">
-            <button type="button" onClick={handlePrint} className="flex items-center gap-1 rounded-full px-2.5 py-1.5 text-sm text-gray-700 transition-colors hover:bg-neutral-200/80" title="Print">
+        <div className="flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--toolbar-bg)] px-1.5 py-1 shadow-sm">
+            <button type="button" onClick={handlePrint} className="flex items-center gap-1 rounded-full px-2.5 py-1.5 text-sm text-gray-700 dark:text-zinc-300 transition-colors hover:bg-neutral-200/80 dark:hover:bg-zinc-800" title="Print">
                 <PrinterIcon className="size-4" />
                 <span className="hidden sm:inline">Print</span>
             </button>
-            <button type="button" onClick={handleExportPdf} className="flex items-center gap-1 rounded-full px-2.5 py-1.5 text-sm text-gray-700 transition-colors hover:bg-neutral-200/80" title="Export PDF">
+            <button type="button" onClick={handleExportPdf} className="flex items-center gap-1 rounded-full px-2.5 py-1.5 text-sm text-gray-700 dark:text-zinc-300 transition-colors hover:bg-neutral-200/80 dark:hover:bg-zinc-800" title="Export PDF">
                 <FileDownIcon className="size-4" />
                 <span className="hidden sm:inline">PDF</span>
             </button>
-            <button type="button" onClick={handleExportDocx} className="flex items-center gap-1 rounded-full px-2.5 py-1.5 text-sm text-gray-700 transition-colors hover:bg-neutral-200/80" title="Export Word">
+            <button type="button" onClick={handleExportDocx} className="flex items-center gap-1 rounded-full px-2.5 py-1.5 text-sm text-gray-700 dark:text-zinc-300 transition-colors hover:bg-neutral-200/80 dark:hover:bg-zinc-800" title="Export Word">
                 <FileTextIcon className="size-4" />
                 <span className="hidden sm:inline">DOCX</span>
             </button>

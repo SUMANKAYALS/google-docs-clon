@@ -223,8 +223,8 @@ export function ShareDialog({
             <div className="space-y-6 mt-2">
               {/* Search Registered Users Section (Owner Only) */}
               {isOwner && (
-                <div className="space-y-3 bg-neutral-50 p-3.5 rounded-xl border border-neutral-200">
-                  <span className="text-xs font-bold text-gray-700 uppercase tracking-wider block">
+                <div className="space-y-3 bg-neutral-50 dark:bg-zinc-850/50 p-3.5 rounded-xl border border-neutral-200 dark:border-zinc-800">
+                  <span className="text-xs font-bold text-gray-700 dark:text-zinc-300 uppercase tracking-wider block">
                     Add People
                   </span>
 
@@ -236,13 +236,13 @@ export function ShareDialog({
                         placeholder="Search users by name or email..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-9 bg-white border-neutral-200 text-xs"
+                        className="pl-9 bg-white dark:bg-zinc-900 border-neutral-200 dark:border-zinc-755 text-xs text-gray-900 dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-555"
                       />
                     </div>
                     <select
                       value={selectedRole}
                       onChange={(e) => setSelectedRole(e.target.value as "editor" | "viewer")}
-                      className="text-xs border border-neutral-200 rounded-md px-2 py-2 bg-white font-medium text-gray-700 focus:outline-none"
+                      className="text-xs border border-neutral-200 dark:border-zinc-700 rounded-md px-2 py-2 bg-white dark:bg-zinc-900 font-medium text-gray-700 dark:text-zinc-300 focus:outline-none"
                     >
                       <option value="editor">Editor</option>
                       <option value="viewer">Viewer</option>
@@ -250,20 +250,20 @@ export function ShareDialog({
                   </div>
 
                   {inviteSuccessMsg && (
-                    <div className="text-xs text-emerald-700 bg-emerald-50 p-2 rounded font-medium">
+                    <div className="text-xs text-emerald-700 dark:text-emerald-450 bg-emerald-50 dark:bg-emerald-950/20 p-2 rounded font-medium">
                       {inviteSuccessMsg}
                     </div>
                   )}
                   {inviteErrorMsg && (
-                    <div className="text-xs text-red-700 bg-red-50 p-2 rounded font-medium">
+                    <div className="text-xs text-red-700 dark:text-red-450 bg-red-50 dark:bg-red-950/20 p-2 rounded font-medium">
                       {inviteErrorMsg}
                     </div>
                   )}
 
                   {/* Search Results */}
                   {isSearching ? (
-                    <div className="py-3 text-center text-xs text-gray-500 flex items-center justify-center">
-                      <Loader2Icon className="size-3.5 animate-spin mr-1.5 text-blue-600" />
+                    <div className="py-3 text-center text-xs text-gray-500 dark:text-zinc-400 flex items-center justify-center">
+                      <Loader2Icon className="size-3.5 animate-spin mr-1.5 text-blue-600 dark:text-blue-450" />
                       Searching workspace users...
                     </div>
                   ) : searchResults.length > 0 ? (
@@ -271,27 +271,27 @@ export function ShareDialog({
                       {searchResults.map((user) => (
                         <div
                           key={user.id}
-                          className="flex items-center justify-between p-2 bg-white rounded-lg border border-neutral-100 hover:border-blue-200 transition-colors"
+                          className="flex items-center justify-between p-2 bg-white dark:bg-zinc-900 rounded-lg border border-neutral-100 dark:border-zinc-800 hover:border-blue-200 dark:hover:border-blue-900/40 transition-colors"
                         >
                           <div className="flex items-center gap-x-2.5">
-                            <Avatar className="size-7 border">
+                            <Avatar className="size-7 border dark:border-zinc-800">
                               <AvatarImage src={user.image} alt={user.name} />
                               <AvatarFallback className="bg-blue-600 text-white text-[10px] font-bold">
                                 {user.name.slice(0, 2).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col">
-                              <span className="text-xs font-semibold text-gray-900">{user.name}</span>
-                              <span className="text-[10px] text-gray-500">{user.email}</span>
+                              <span className="text-xs font-semibold text-gray-900 dark:text-zinc-100">{user.name}</span>
+                              <span className="text-[10px] text-gray-500 dark:text-zinc-400">{user.email}</span>
                             </div>
                           </div>
 
                           {user.isCollaborator ? (
-                            <span className="text-[10px] font-medium text-gray-400 bg-neutral-100 px-2 py-0.5 rounded">
+                            <span className="text-[10px] font-medium text-gray-400 dark:text-zinc-500 bg-neutral-100 dark:bg-zinc-800 px-2 py-0.5 rounded">
                               Member
                             </span>
                           ) : user.isPendingInvite ? (
-                            <span className="text-[10px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
+                            <span className="text-[10px] font-medium text-amber-700 dark:text-amber-450 bg-amber-50 dark:bg-amber-950/20 px-2 py-0.5 rounded">
                               Invited
                             </span>
                           ) : (
@@ -318,14 +318,14 @@ export function ShareDialog({
               )}
 
               {/* Shareable Link Box */}
-              <div className="bg-blue-50/60 border border-blue-100 p-3.5 rounded-xl space-y-2">
+              <div className="bg-blue-50/60 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40 p-3.5 rounded-xl space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-blue-900 uppercase tracking-wider">
+                  <span className="text-xs font-bold text-blue-900 dark:text-blue-300 uppercase tracking-wider">
                     Invite Link
                   </span>
                   <div className="flex items-center gap-x-2">
                     {inviteCode && (
-                      <span className="text-xs font-mono font-semibold bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                      <span className="text-xs font-mono font-semibold bg-blue-100 dark:bg-blue-950/40 text-blue-800 dark:text-blue-400 px-2 py-0.5 rounded">
                         Code: {inviteCode}
                       </span>
                     )}
@@ -333,7 +333,7 @@ export function ShareDialog({
                       <button
                         type="button"
                         onClick={handleRegenerateCode}
-                        className="text-blue-700 hover:text-blue-900 p-1 rounded"
+                        className="text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 p-1 rounded"
                         title="Regenerate link code"
                       >
                         <RefreshCwIcon className="size-3.5" />
@@ -346,7 +346,7 @@ export function ShareDialog({
                     type="text"
                     readOnly
                     value={getShareUrl()}
-                    className="flex-1 bg-white border border-neutral-200 rounded-lg px-3 py-1.5 text-xs text-gray-700 font-mono focus:outline-none select-all"
+                    className="flex-1 bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-gray-700 dark:text-zinc-300 font-mono focus:outline-none select-all"
                   />
                   <Button
                     onClick={handleCopyLink}
@@ -374,20 +374,20 @@ export function ShareDialog({
 
                 {/* Owner Entry */}
                 {owner && (
-                  <div className="flex items-center justify-between p-2 rounded-lg hover:bg-neutral-50 transition-colors">
+                  <div className="flex items-center justify-between p-2 rounded-lg hover:bg-neutral-50 dark:hover:bg-zinc-800 transition-colors">
                     <div className="flex items-center gap-x-3">
-                      <Avatar className="size-8 border">
+                      <Avatar className="size-8 border dark:border-zinc-850">
                         <AvatarImage src={owner.image} alt={owner.name} />
                         <AvatarFallback className="bg-blue-600 text-white text-xs font-bold">
                           {owner.name?.slice(0, 2).toUpperCase() || "OW"}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
-                        <span className="text-sm font-semibold text-gray-900">{owner.name} (Owner)</span>
-                        <span className="text-xs text-gray-500">{owner.email}</span>
+                        <span className="text-sm font-semibold text-gray-900 dark:text-zinc-100">{owner.name} (Owner)</span>
+                        <span className="text-xs text-gray-500 dark:text-zinc-400">{owner.email}</span>
                       </div>
                     </div>
-                    <span className="text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-full flex items-center gap-x-1">
+                    <span className="text-xs font-semibold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 px-2.5 py-1 rounded-full flex items-center gap-x-1">
                       <ShieldIcon className="size-3" /> Owner
                     </span>
                   </div>
@@ -402,18 +402,18 @@ export function ShareDialog({
                   return (
                     <div
                       key={c.userId}
-                      className="flex items-center justify-between p-2 rounded-lg hover:bg-neutral-50 transition-colors"
+                      className="flex items-center justify-between p-2 rounded-lg hover:bg-neutral-50 dark:hover:bg-zinc-800 transition-colors"
                     >
                       <div className="flex items-center gap-x-3">
-                        <Avatar className="size-8 border">
+                        <Avatar className="size-8 border dark:border-zinc-850">
                           <AvatarImage src={c.image} alt={c.name} />
-                          <AvatarFallback className="bg-neutral-700 text-white text-xs font-bold">
+                          <AvatarFallback className="bg-neutral-700 dark:bg-zinc-800 text-white text-xs font-bold">
                             {initials}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">
-                          <span className="text-sm font-medium text-gray-900">{c.name}</span>
-                          <span className="text-xs text-gray-500">{c.email}</span>
+                          <span className="text-sm font-medium text-gray-900 dark:text-zinc-100">{c.name}</span>
+                          <span className="text-xs text-gray-500 dark:text-zinc-400">{c.email}</span>
                         </div>
                       </div>
 
@@ -425,7 +425,7 @@ export function ShareDialog({
                               onChange={(e) =>
                                 handleRoleChange(c.userId, e.target.value as "editor" | "viewer")
                               }
-                              className="text-xs border border-neutral-300 rounded px-2 py-1 bg-white font-medium text-gray-700 focus:outline-none"
+                              className="text-xs border border-neutral-300 dark:border-zinc-700 rounded px-2 py-1 bg-white dark:bg-zinc-900 font-medium text-gray-700 dark:text-zinc-300 focus:outline-none"
                             >
                               <option value="editor">Can Edit</option>
                               <option value="viewer">Can View</option>
@@ -434,17 +434,17 @@ export function ShareDialog({
                             <button
                               type="button"
                               onClick={() => handleRemoveCollaborator(c.userId)}
-                              className="p-1 text-gray-400 hover:text-red-600 rounded transition-colors"
+                              className="p-1 text-gray-400 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 rounded transition-colors"
                               title="Remove collaborator"
                             >
                               <Trash2Icon className="size-4" />
                             </button>
                           </>
                         ) : (
-                          <span className="text-xs font-medium text-gray-600 bg-neutral-100 px-2.5 py-1 rounded-full flex items-center gap-x-1">
+                          <span className="text-xs font-medium text-gray-600 dark:text-zinc-350 bg-neutral-100 dark:bg-zinc-800 px-2.5 py-1 rounded-full flex items-center gap-x-1">
                             {c.role === "editor" ? (
                               <>
-                                <Edit3Icon className="size-3 text-emerald-600" /> Editor
+                                <Edit3Icon className="size-3 text-emerald-600 dark:text-emerald-450" /> Editor
                               </>
                             ) : (
                               <>

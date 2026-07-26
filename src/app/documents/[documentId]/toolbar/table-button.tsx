@@ -50,17 +50,17 @@ export const TableButton = React.memo(() => {
                     type="button"
                     aria-label="Table options"
                     title="Insert table"
-                    className="h-7 min-w-7 shrink-0 flex flex-col items-center justify-center rounded-sm hover:bg-neutral-200/80 overflow-hidden text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
+                    className="h-7 min-w-7 shrink-0 flex flex-col items-center justify-center rounded-sm hover:bg-neutral-200/80 dark:hover:bg-zinc-700/80 text-gray-700 dark:text-zinc-300 overflow-hidden text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
                 >
                     <TableIcon className="size-4" />
                 </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="p-2 flex flex-col gap-y-1.5 z-50 min-w-[200px] bg-white border shadow-md rounded-md">
-                <div className="px-1 text-[11px] font-semibold text-neutral-400 select-none">
+            <DropdownMenuContent className="p-2 flex flex-col gap-y-1.5 z-50 min-w-[200px] bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 shadow-md rounded-md">
+                <div className="px-1 text-[11px] font-semibold text-neutral-400 dark:text-zinc-500 select-none">
                     INSERT TABLE
                 </div>
                 <div
-                    className="flex flex-col gap-1 p-1 bg-neutral-50 border border-neutral-200 rounded-sm self-center"
+                    className="flex flex-col gap-1 p-1 bg-neutral-50 dark:bg-zinc-850 border border-neutral-200 dark:border-zinc-700 rounded-sm self-center"
                     onMouseLeave={() => {
                         setHoveredRow(0);
                         setHoveredCol(0);
@@ -86,7 +86,7 @@ export const TableButton = React.memo(() => {
                                                 "size-3.5 border rounded-[1px] transition-colors duration-75",
                                                 isHighlighted
                                                     ? "bg-blue-400 border-blue-500"
-                                                    : "bg-white border-neutral-300 hover:border-neutral-400"
+                                                    : "bg-white dark:bg-zinc-900 border-neutral-300 dark:border-zinc-700 hover:border-neutral-400 dark:hover:border-zinc-555"
                                             )}
                                             aria-label={`Insert ${row}x${col} table`}
                                         />
@@ -95,20 +95,20 @@ export const TableButton = React.memo(() => {
                             </div>
                         );
                     })}
-                    <div className="text-center text-xs text-neutral-600 font-semibold pt-1 select-none">
+                    <div className="text-center text-xs text-neutral-600 dark:text-zinc-400 font-semibold pt-1 select-none">
                         {hoveredRow > 0 && hoveredCol > 0 ? `${hoveredRow} × ${hoveredCol}` : "Select size"}
                     </div>
                 </div>
 
-                <Separator className="my-1 bg-neutral-200" />
-                <div className="px-1 text-[11px] font-semibold text-neutral-400 select-none">
+                <Separator className="my-1 bg-neutral-200 dark:bg-zinc-800" />
+                <div className="px-1 text-[11px] font-semibold text-neutral-400 dark:text-zinc-500 select-none">
                     TABLE MODIFY
                 </div>
 
                 <div className="flex flex-col gap-y-0.5">
                     {tableCommands.map((cmd, idx) => {
                         if (cmd.type === "separator") {
-                            return <Separator key={idx} className="my-1 bg-neutral-200" />;
+                            return <Separator key={idx} className="my-1 bg-neutral-200 dark:bg-zinc-800" />;
                         }
                         return (
                             <button
@@ -117,12 +117,12 @@ export const TableButton = React.memo(() => {
                                 disabled={!isTableActive}
                                 onClick={cmd.action}
                                 className={cn(
-                                    "flex items-center px-2 py-1 rounded-sm text-left text-xs transition-colors w-full focus-visible:outline-none focus-visible:bg-neutral-100",
+                                    "flex items-center px-2 py-1 rounded-sm text-left text-xs transition-colors w-full focus-visible:outline-none focus-visible:bg-neutral-100 dark:focus-visible:bg-zinc-800",
                                     !isTableActive
-                                        ? "opacity-40 cursor-not-allowed text-neutral-400 hover:bg-transparent"
+                                        ? "opacity-40 cursor-not-allowed text-neutral-400 dark:text-zinc-650 hover:bg-transparent"
                                         : cmd.isDestructive
-                                            ? "text-red-600 hover:bg-red-50 font-medium"
-                                            : "text-neutral-700 hover:bg-neutral-100"
+                                            ? "text-red-600 dark:text-red-450 hover:bg-red-50 dark:hover:bg-red-950/20 font-medium"
+                                            : "text-neutral-700 dark:text-zinc-300 hover:bg-neutral-100 dark:hover:bg-zinc-800"
                                 )}
                             >
                                 {cmd.label}

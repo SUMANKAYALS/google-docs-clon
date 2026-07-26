@@ -40,7 +40,7 @@ export default function RegisterPage() {
     } else {
       setSuccess("Account created successfully! Redirecting to sign in...");
       setTimeout(() => {
-        router.push("/login");
+        router.push(`/verify-email?email=${email}`);
       }, 1500);
     }
   };

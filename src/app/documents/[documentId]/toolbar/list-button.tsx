@@ -35,7 +35,7 @@ export const ListButton = React.memo(() => {
                     type="button"
                     aria-label="List options"
                     title="List options"
-                    className="h-7 min-w-7 shrink-0 flex flex-col items-center justify-center rounded-sm hover:bg-neutral-200/80 overflow-hidden text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
+                    className="h-7 min-w-7 shrink-0 flex flex-col items-center justify-center rounded-sm hover:bg-neutral-200/80 dark:hover:bg-zinc-700/80 text-gray-700 dark:text-zinc-300 overflow-hidden text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
                 >
                     <ListIcon className="size-4" />
                 </button>
@@ -47,8 +47,8 @@ export const ListButton = React.memo(() => {
                         key={label}
                         onClick={onClick}
                         className={cn(
-                            "flex items-center gap-x-2 px-2 py-1 rounded-sm hover:bg-neutral-200/80 text-left text-sm w-full transition-colors",
-                            isActive() && "bg-neutral-200/80 font-medium"
+                            "flex items-center gap-x-2 px-2 py-1 rounded-sm hover:bg-neutral-200/80 dark:hover:bg-zinc-700/80 text-left text-sm w-full transition-colors text-gray-700 dark:text-zinc-300",
+                            isActive() && "bg-neutral-200/80 dark:bg-zinc-700/80 font-medium text-gray-900 dark:text-zinc-100"
                         )}
                     >
                         <Icon className="size-4 shrink-0" />

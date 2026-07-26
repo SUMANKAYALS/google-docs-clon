@@ -21,6 +21,8 @@ import { ImageButton } from "./image-button";
 import { TableButton } from "./table-button";
 import { AlignButton } from "./align-button";
 import { ListButton } from "./list-button";
+import { TextColorButton } from "./text-color-button";
+import { HighlightColorButton } from "./highlight-color-button";
 
 interface ToolbarProps {
     onOpenAIAssistant?: () => void;
@@ -33,13 +35,13 @@ export const Toolbar = React.memo(({ onOpenAIAssistant }: ToolbarProps) => {
         <div
             role="toolbar"
             aria-label="Editor toolbar"
-            className="flex min-h-[40px] items-center gap-1 overflow-x-auto rounded-full border border-neutral-200 bg-neutral-50/90 px-1.5 py-1 shadow-sm print:hidden"
+            className="flex min-h-[40px] items-center gap-1 overflow-x-auto rounded-full border border-[var(--border)] bg-[var(--toolbar-bg)] px-1.5 py-1 shadow-sm print:hidden text-gray-700 dark:text-zinc-350"
         >
-            <button type="button" onClick={onOpenAIAssistant} className="flex h-7 items-center gap-1 rounded-sm border border-blue-200 bg-blue-50 px-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100">
+            <button type="button" onClick={onOpenAIAssistant} className="flex h-7 items-center gap-1 rounded-sm border border-blue-200 dark:border-blue-900/40 bg-blue-50 dark:bg-blue-950/30 px-2 text-sm font-medium text-blue-700 dark:text-blue-450 transition-colors hover:bg-blue-100 dark:hover:bg-blue-900/30">
                 <SparklesIcon className="size-4" />
                 <span className="hidden md:inline">AI Assistant</span>
             </button>
-            <Separator orientation="vertical" className="mx-0.5 h-6 bg-neutral-300" />
+            <Separator orientation="vertical" className="mx-0.5 h-6 bg-[var(--border)]" />
             <ToolbarButton
                 label="Undo"
                 icon={Undo2Icon}
@@ -50,7 +52,7 @@ export const Toolbar = React.memo(({ onOpenAIAssistant }: ToolbarProps) => {
                 icon={Redo2Icon}
                 onClick={() => editor?.chain().focus().redo().run()}
             />
-            <Separator orientation="vertical" className="mx-0.5 h-6 bg-neutral-300" />
+            <Separator orientation="vertical" className="mx-0.5 h-6 bg-[var(--border)]" />
             <ToolbarButton
                 label="Bold"
                 icon={BoldIcon}
@@ -69,14 +71,16 @@ export const Toolbar = React.memo(({ onOpenAIAssistant }: ToolbarProps) => {
                 isActive={editor?.isActive("underline")}
                 onClick={() => editor?.chain().focus().toggleUnderline().run()}
             />
-            <Separator orientation="vertical" className="mx-0.5 h-6 bg-neutral-300" />
+            <TextColorButton />
+            <HighlightColorButton />
+            <Separator orientation="vertical" className="mx-0.5 h-6 bg-[var(--border)]" />
             <FontFamilyButton />
             <HeadingLevelButton />
             <FontSizeButton />
-            <Separator orientation="vertical" className="mx-0.5 h-6 bg-neutral-300" />
+            <Separator orientation="vertical" className="mx-0.5 h-6 bg-[var(--border)]" />
             <AlignButton />
             <ListButton />
-            <Separator orientation="vertical" className="mx-0.5 h-6 bg-neutral-300" />
+            <Separator orientation="vertical" className="mx-0.5 h-6 bg-[var(--border)]" />
             <LinkButton />
             <ImageButton />
             <TableButton />
