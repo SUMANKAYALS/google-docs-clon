@@ -3,10 +3,8 @@
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
-import { Mail, Loader2, Check, AlertCircle, ArrowLeft, RefreshCw, Edit2 } from "lucide-react";
+import { Mail, Loader2, Check, AlertCircle, RefreshCw, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 function VerifyEmailForm() {
   const router = useRouter();

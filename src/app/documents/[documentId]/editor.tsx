@@ -13,7 +13,7 @@ import FontFamily from "@tiptap/extension-font-family";
 import Link from "@tiptap/extension-link";
 import { Color } from "@tiptap/extension-color";
 import Highlight from "@tiptap/extension-highlight";
-import ImageResize from "tiptap-extension-resize-image";
+import Image from "@tiptap/extension-image";
 import Table from "@tiptap/extension-table";
 import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
@@ -154,7 +154,7 @@ export const Editor = React.memo(({
         FontFamily,
         TextStyle,
         Underline,
-        ImageResize,
+        Image,
         Table.configure({
             resizable: true,
         }),

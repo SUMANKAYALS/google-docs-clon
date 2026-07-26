@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import {
   Loader2, ArrowLeft, Camera, Check, AlertCircle, Sparkles, CheckCircle2, Upload
 } from "lucide-react";
@@ -40,6 +41,7 @@ interface UserProfile {
   aiEnabled: boolean;
   twoFactorEnabled: boolean;
   createdAt: string;
+  isVerified?: boolean;
 }
 
 const DICEBEAR_STYLES = [
@@ -54,7 +56,8 @@ const DICEBEAR_STYLES = [
 ];
 
 export default function ProfilePage() {
-  const { data: session, update } = useSession();
+  const { data: session, status, update } = useSession();
+  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Profile data state
@@ -82,27 +85,117 @@ export default function ProfilePage() {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [cropDimensions, setCropDimensions] = useState({ width: 0, height: 0, left: 0, top: 0 });
 
+  // Handle unauthenticated user redirect
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/login");
+    }
+  }, [status, router]);
+
   // Load profile data on mount
   useEffect(() => {
+    let isMounted = true;
+
     async function fetchProfile() {
-      setLoading(true);
-      const res = await getUserProfileAction();
-      if (res.success && res.user) {
-        setProfile(res.user);
-        setOriginalProfile(res.user);
-
-        // Detect if user has a custom avatar (i.e. not empty and not a DiceBear URL)
-        const hasCustom = !!res.user.image && !res.user.image.startsWith("https://api.dicebear.com");
-        setIsCustomAvatar(hasCustom);
-      } else {
-        setError(res.error || "Failed to load profile");
+      if (status === "loading") return;
+      if (status === "unauthenticated") {
+        setLoading(false);
+        return;
       }
-      setLoading(false);
-    }
-    fetchProfile();
-  }, []);
 
-  // Generate 24 DiceBear avatars based on style and name seeds (8 styles x 3 variations)
+      setLoading(true);
+      setError("");
+
+      try {
+        const res = await getUserProfileAction();
+        if (!isMounted) return;
+
+        if (res.success && res.user) {
+          setProfile(res.user);
+          setOriginalProfile(res.user);
+          const hasCustom = !!res.user.image && !res.user.image.startsWith("https://api.dicebear.com");
+          setIsCustomAvatar(hasCustom);
+        } else if (session?.user) {
+          // Fallback to session data if DB query had issues or returned empty
+          const fallbackProfile: UserProfile = {
+            id: session.user.id || "",
+            name: session.user.name || "User",
+            email: session.user.email || "",
+            image: session.user.image || "",
+            role: "user",
+            username: "",
+            bio: "",
+            location: "",
+            website: "",
+            jobTitle: "",
+            company: "",
+            phoneNumber: "",
+            timezone: "",
+            language: "English",
+            defaultFont: "Inter",
+            defaultFontSize: "16px",
+            pageSize: "Letter",
+            autoSaveEnabled: true,
+            aiEnabled: true,
+            twoFactorEnabled: false,
+            createdAt: new Date().toISOString(),
+            isVerified: true,
+          };
+          setProfile(fallbackProfile);
+          setOriginalProfile(fallbackProfile);
+          if (res.error) {
+            setError(res.error);
+          }
+        } else {
+          setError(res.error || "Failed to load profile data");
+        }
+      } catch (err: unknown) {
+        if (!isMounted) return;
+        console.error("Fetch profile exception:", err);
+        setError("Network error loading profile");
+        if (session?.user) {
+          const fallbackProfile: UserProfile = {
+            id: session.user.id || "",
+            name: session.user.name || "User",
+            email: session.user.email || "",
+            image: session.user.image || "",
+            role: "user",
+            username: "",
+            bio: "",
+            location: "",
+            website: "",
+            jobTitle: "",
+            company: "",
+            phoneNumber: "",
+            timezone: "",
+            language: "English",
+            defaultFont: "Inter",
+            defaultFontSize: "16px",
+            pageSize: "Letter",
+            autoSaveEnabled: true,
+            aiEnabled: true,
+            twoFactorEnabled: false,
+            createdAt: new Date().toISOString(),
+            isVerified: true,
+          };
+          setProfile(fallbackProfile);
+          setOriginalProfile(fallbackProfile);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [session, status]);
+
+  // Generate 24 DiceBear avatars based on style and name seeds
   const dicebearAvatars = useMemo(() => {
     if (!profile) return [];
     const nameSeed = profile.name.trim() || "User";
@@ -117,20 +210,29 @@ export default function ProfilePage() {
     return list;
   }, [profile]);
 
-  if (!session || !session.user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8f9fa] dark:bg-[#0c0a09]">
-        <Loader2 className="size-8 text-blue-600 animate-spin" />
-      </div>
-    );
-  }
-
-  if (loading || !profile) {
+  if (status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-[#f8f9fa] dark:bg-[#0c0a09] flex flex-col justify-center items-center">
         <div className="flex flex-col items-center gap-y-4">
           <Loader2 className="size-8 animate-spin text-blue-600 dark:text-blue-400" />
           <span className="text-sm font-medium text-neutral-500 dark:text-zinc-400">Loading account data...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session || !session.user || !profile) {
+    return (
+      <div className="min-h-screen bg-[#f8f9fa] dark:bg-[#0c0a09] flex flex-col justify-center items-center p-6">
+        <div className="bg-white dark:bg-[#18181b] border border-neutral-200 dark:border-zinc-800 rounded-2xl p-8 max-w-md w-full text-center space-y-4 shadow-lg">
+          <AlertCircle className="size-12 text-rose-500 mx-auto" />
+          <h2 className="text-lg font-bold text-neutral-900 dark:text-zinc-100">Unable to Load Account Profile</h2>
+          <p className="text-xs text-neutral-500 dark:text-zinc-400">{error || "You must be signed in to view this page."}</p>
+          <div className="pt-2">
+            <Button asChild className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+              <Link href="/login">Return to Login</Link>
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -142,19 +244,26 @@ export default function ProfilePage() {
     : profile.image || `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(profile.name.trim() || "User")}`;
 
   // Check if there are unsaved changes
-  const hasChanges = profile.name !== originalProfile?.name || profile.image !== originalProfile?.image;
+  const hasChanges =
+    profile.name !== originalProfile?.name ||
+    profile.image !== originalProfile?.image ||
+    profile.username !== originalProfile?.username;
 
   // Name change handler
   const handleNameChange = (newName: string) => {
     setProfile(prev => {
       if (!prev) return null;
       const updated = { ...prev, name: newName };
-      // If not custom, image updates dynamically to match the name seed
       if (!isCustomAvatar) {
         updated.image = `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(newName.trim() || "User")}`;
       }
       return updated;
     });
+  };
+
+  // Username change handler
+  const handleUsernameChange = (newUsername: string) => {
+    setProfile(prev => (prev ? { ...prev, username: newUsername } : null));
   };
 
   // Custom Cropper Touch / Mouse Interactions
@@ -236,17 +345,13 @@ export default function ProfilePage() {
         const ctx = canvas.getContext("2d");
         if (!ctx) throw new Error("Could not construct 2D context");
 
-        // Canvas background
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, 280, 280);
 
-        // Fit image
         const scale = Math.max(280 / img.naturalWidth, 280 / img.naturalHeight);
         const renderWidth = img.naturalWidth * scale;
         const renderHeight = img.naturalHeight * scale;
 
-        // Viewport is centered 140px inside 280px crop area (70px boundary)
-        // Canvas output scale is 2x
         const drawX = (70 + offset.x - (renderWidth * zoom) / 2) * 2;
         const drawY = (70 + offset.y - (renderHeight * zoom) / 2) * 2;
         const drawWidth = renderWidth * zoom * 2;
@@ -294,7 +399,6 @@ export default function ProfilePage() {
       if (data.secure_url) {
         setProfile(prev => prev ? { ...prev, image: data.secure_url } : null);
         setIsCustomAvatar(true);
-        // Reset crop/picker modal
         setIsModalOpen(false);
         setIsCropping(false);
         setImageSrc(null);
@@ -319,8 +423,9 @@ export default function ProfilePage() {
     }
   };
 
-  // Save changes (Name & AvatarUrl) to MongoDB
+  // Save changes (Name & AvatarUrl & Username) to MongoDB
   const handleSaveChanges = async () => {
+    if (!profile) return;
     setError("");
     setSuccess("");
     setSaving(true);
@@ -392,7 +497,7 @@ export default function ProfilePage() {
                 />
               </div>
 
-              {/* Verified Badge and context details */}
+              {/* Name & Verification Badge */}
               <h2 className="text-2xl font-semibold text-neutral-900 dark:text-zinc-100 mt-4 leading-tight tracking-tight">
                 {profile.name || "Unnamed User"}
               </h2>
@@ -402,11 +507,13 @@ export default function ProfilePage() {
                   {profile.email}
                 </span>
 
-                {/* Elegant Verified badge */}
-                <span className="flex items-center gap-x-1 px-2.5 py-0.5 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-[11px] font-semibold rounded-full select-none border border-blue-200/50 dark:border-blue-800/30">
-                  <CheckCircle2 className="size-3.5 fill-blue-600 dark:fill-blue-400 text-white dark:text-zinc-950" />
-                  Verified
-                </span>
+                {/* Verification badge */}
+                {(profile.isVerified !== false) && (
+                  <span className="flex items-center gap-x-1 px-2.5 py-0.5 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-[11px] font-semibold rounded-full select-none border border-blue-200/50 dark:border-blue-800/30">
+                    <CheckCircle2 className="size-3.5 fill-blue-600 dark:fill-blue-400 text-white dark:text-zinc-950" />
+                    Verified
+                  </span>
+                )}
               </div>
 
               {/* Change Avatar trigger button */}
@@ -454,6 +561,22 @@ export default function ProfilePage() {
                   onChange={(e) => handleNameChange(e.target.value)}
                   className="bg-[#f8f9fa] dark:bg-zinc-900 border-[#dadce0] dark:border-zinc-700 focus:bg-white dark:focus:bg-zinc-950 h-12 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all pl-4"
                   aria-label="Full Name Input"
+                />
+              </div>
+
+              {/* Username field */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-neutral-500 dark:text-zinc-400 uppercase tracking-wider pl-1" htmlFor="username">
+                  Username
+                </label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="Choose a unique username"
+                  value={profile.username || ""}
+                  onChange={(e) => handleUsernameChange(e.target.value)}
+                  className="bg-[#f8f9fa] dark:bg-zinc-900 border-[#dadce0] dark:border-zinc-700 focus:bg-white dark:focus:bg-zinc-950 h-12 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all pl-4"
+                  aria-label="Username Input"
                 />
               </div>
 
