@@ -6,6 +6,8 @@ import { User } from "@/models/User";
 import { loginSchema } from "@/lib/validations/auth";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
+
   providers: [
     CredentialsProvider({
       name: "Credentials",
