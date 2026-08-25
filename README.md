@@ -2,7 +2,7 @@
 
 # 📄 TechDocs
 
-### A feature-rich Google Docs clone — real-time, collaborative, and beautifully crafted.
+### A feature-rich CLOUDS DOCS WORKSPACE — real-time, collaborative, and beautifully crafted.
 
 [![Next.js](https://img.shields.io/badge/Next.js_15-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Tiptap](https://img.shields.io/badge/Tiptap-Editor-6200EA?style=for-the-badge)](https://tiptap.dev/)
